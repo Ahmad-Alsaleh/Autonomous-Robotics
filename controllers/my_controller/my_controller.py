@@ -1,8 +1,9 @@
 from controller import Robot
-
+import numpy as np
 
 class Controller(Robot):
     SPEED = 6
+    GOAL = np.array([113.6, 113.6])
 
     def __init__(self):
         super().__init__()
@@ -11,7 +12,7 @@ class Controller(Robot):
         # self.ds1 = self.getDevice('ds1')
         # self.ds0.enable(self.timeStep)
         # self.ds1.enable(self.timeStep)
-
+        self.pen = self.getDevice('pen')
         self.gps = self.getDevice('gps')
         self.gps.enable(self.timeStep)
 
@@ -19,16 +20,27 @@ class Controller(Robot):
         # self.receiver.enable(self.timeStep)
 
         # Get a handler to the motors and set target position to infinity (speed control).
-        # self.left_motor = self.getDevice('left wheel motor')
-        # self.right_motor = self.getDevice('right wheel motor')
-        # self.left_motor.setPosition(float('inf'))
-        # self.right_motor.setPosition(float('inf'))
-        # self.left_motor.setVelocity(0.0)
-        # self.right_motor.setVelocity(0.0)
+        self.left_motor = self.getDevice('left wheel motor')
+        self.right_motor = self.getDevice('right wheel motor')
+        self.left_motor.setPosition(float('inf'))
+        self.right_motor.setPosition(float('inf'))
+        self.left_motor.setVelocity(0.0)
+        self.right_motor.setVelocity(0.0)
 
         # get key presses from keyboard
         self.keyboard = self.getKeyboard()
         self.keyboard.enable(self.timeStep)
+
+    def get_position(self):
+        return np.array(self.gps.getValues())[:2]
+
+    def print_gps(self, key):
+        if key == 'G':
+            position = self.get_position()
+            print(f'GPS position: {position[0]:.3f} {position[1]:.3f}')
+        elif key == 'V':
+            speed, speed_vector_values = self.gps.getSpeed(), self.gps.getSpeedVector()
+            print(f'GPS speed vector:', speed, *speed_vector_values)
 
     def run(self):
         print("Press 'G' to read the GPS device's position")
@@ -36,13 +48,7 @@ class Controller(Robot):
         
         while self.step(self.timeStep) != -1:
             key = chr(self.keyboard.getKey() & 0xff)
-            if key == 'G':
-                gps_values = self.gps.getValues()
-                print('GPS position:', *gps_values)
-            elif key == 'V':
-                speed_vector_values = self.gps.getSpeedVector()
-                print(f'GPS speed vector: {speed_vector_values[0]} {speed_vector_values[1]} {speed_vector_values[2]}')
-
+            self.print_gps(key)
             # ds0_value = self.ds0.getValue()
             # ds1_value = self.ds1.getValue()
             # if ds1_value > 500:
@@ -63,8 +69,8 @@ class Controller(Robot):
             #     left_speed = self.SPEED
             #     right_speed = self.SPEED
 
-            # self.left_motor.setVelocity(left_speed)
-            # self.right_motor.setVelocity(right_speed)
+            self.left_motor.setVelocity(1)
+            self.right_motor.setVelocity(1)
 
 
 controller = Controller()
