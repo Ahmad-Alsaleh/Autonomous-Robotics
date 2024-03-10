@@ -3,7 +3,7 @@ import numpy as np
 
 class Controller(Robot):
     SPEED = 6
-    GOAL = np.array([113.6, 113.6])
+    GOAL = np.array([1.136, 1.136])
 
     def __init__(self):
         super().__init__()
@@ -15,7 +15,8 @@ class Controller(Robot):
         self.pen = self.getDevice('pen')
         self.gps = self.getDevice('gps')
         self.gps.enable(self.timeStep)
-
+        self.imu = self.getDevice('IMU')
+        self.imu.enable(self.timeStep)
         # self.receiver = self.getDevice('receiver')
         # self.receiver.enable(self.timeStep)
 
@@ -33,7 +34,10 @@ class Controller(Robot):
 
     def get_position(self):
         return np.array(self.gps.getValues())[:2]
-
+    def get_orientaiton(self):
+        roll, pitch, yaw = self.imu.getRollPitchYaw()
+        return yaw
+        
     def print_gps(self, key):
         if key == 'G':
             position = self.get_position()
@@ -41,36 +45,60 @@ class Controller(Robot):
         elif key == 'V':
             speed, speed_vector_values = self.gps.getSpeed(), self.gps.getSpeedVector()
             print(f'GPS speed vector:', speed, *speed_vector_values)
+            
+    def get_heading_angle(self, position):
+        # Calculate the heading angle to the goal
+        heading_vector = Controller.GOAL - position
+        return np.arctan2(heading_vector[1], heading_vector[0])
 
+    def get_proportional_control(self, target, current, Kp):
+        # Calculate the error in a way that takes into account the circular nature of angles
+        error = np.arctan2(np.sin(target - current), np.cos(target - current))
+        # Calculate the proportional control output
+        return Kp * error
+    def minmax(self, x, min, max, new_min, new_max):
+        return (x - min) * (new_max - new_min) / (max - min) + new_min
+
+    def vector_to_speed(self, heading_angle, orientation, max_speed):
+        # convert heading angle to speed
+        # stop if close to goal
+        # position = self.get_position()
+        distance_to_goal = np.linalg.norm(Controller.GOAL - position)
+        if distance_to_goal < 0.05:  # Adjust threshold as needed
+            return 0, 0
+        # print(heading_angle, orientation)
+        # if abs(heading_angle - orientation) < 0.01:
+            # return 0, 0
+        control_output = self.get_proportional_control(heading_angle, orientation, 0.9)
+        control_output = np.clip(control_output, -max_speed, max_speed)
+        left_speed = max_speed - control_output
+        right_speed = max_speed + control_output
+        speed = max(abs(left_speed), abs(right_speed))
+        left_speed *= max_speed / speed
+        right_speed *= max_speed / speed
+        # normalize speeds
+        minimum = min(left_speed, right_speed)
+        maximum = max(left_speed, right_speed)
+        if minimum < -max_speed:
+            left_speed = self.minmax(left_speed, -max_speed, max_speed, -max_speed, max_speed)
+            right_speed = self.minmax(right_speed, -max_speed, max_speed, -max_speed, max_speed)
+        if maximum > max_speed:
+            left_speed = self.minmax(left_speed, minimum, maximum, -max_speed, max_speed)
+            right_speed = self.minmax(right_speed, minimum, maximum, -max_speed, max_speed)
+        return left_speed, right_speed
     def run(self):
         print("Press 'G' to read the GPS device's position")
         print("Press 'V' to read the GPS device's speed vector")
-        
+        previous_position = None
         while self.step(self.timeStep) != -1:
             key = chr(self.keyboard.getKey() & 0xff)
             self.print_gps(key)
-            # ds0_value = self.ds0.getValue()
-            # ds1_value = self.ds1.getValue()
-            # if ds1_value > 500:
-            #     # If both distance sensors are detecting something, this means that
-            #     # we are facing a wall. In this case we need to move backwards.
-            #     if ds0_value > 200:
-            #         left_speed = -self.SPEED / 2
-            #         right_speed = -self.SPEED
-            #     else:
-            #         # we turn proportionnaly to the sensors value because the
-            #         # closer we are from the wall, the more we need to turn.
-            #         left_speed = -ds1_value / 100
-            #         right_speed = (ds0_value / 100) + 0.5
-            # elif ds0_value > 500:
-            #     left_speed = (ds1_value / 100) + 0.5
-            #     right_speed = -ds0_value / 100
-            # else:  # if nothing was detected we can move forward at maximal speed.
-            #     left_speed = self.SPEED
-            #     right_speed = self.SPEED
-
-            self.left_motor.setVelocity(1)
-            self.right_motor.setVelocity(1)
+            position = self.get_position()
+            orientation = self.get_orientaiton()
+            heading_angle = self.get_heading_angle(position)
+            left_speed, right_speed = self.vector_to_speed(heading_angle, orientation, self.SPEED)
+            self.left_motor.setVelocity(left_speed)
+            self.right_motor.setVelocity(right_speed)
 
 
 controller = Controller()
