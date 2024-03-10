@@ -62,7 +62,7 @@ class Controller(Robot):
     def vector_to_speed(self, heading_angle, orientation, max_speed):
         # convert heading angle to speed
         # stop if close to goal
-        # position = self.get_position()
+        position = self.get_position()
         distance_to_goal = np.linalg.norm(Controller.GOAL - position)
         if distance_to_goal < 0.05:  # Adjust threshold as needed
             return 0, 0
