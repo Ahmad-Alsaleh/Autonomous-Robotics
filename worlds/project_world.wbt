@@ -8,8 +8,8 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/project
 WorldInfo {
 }
 Viewpoint {
-  orientation 0.4061841282707206 -0.3891531417143812 -0.8267855140450765 4.481419629700057
-  position 0.7053780343835867 -0.6985326272509543 1.7305857762153205
+  orientation 0.47220628199972736 -0.47560807459399396 -0.7421712650197312 4.4254080028100935
+  position 0.6799537268776465 -2.5149429382196318 6.820772706033424
 }
 TexturedBackground {
 }
@@ -17,8 +17,8 @@ TexturedBackgroundLight {
 }
 RectangleArena {
   translation 0.71 0.71 0
-  floorSize 1.42 1.42
-  floorTileSize 1.42 1.42
+  floorSize 3 3
+  floorTileSize 3 3
   floorAppearance PBRAppearance {
     baseColor 0 0.4 0.5
     roughness 1
@@ -26,8 +26,8 @@ RectangleArena {
   }
 }
 E-puck {
-  translation 0.207588 1.14778 -1.11689e-13
-  rotation 0 0 1 -1.047195307179586
+  translation 0.19337 0.387458 -1.10801e-13
+  rotation 0.00012727000490761557 -5.502069684785602e-05 0.9999999903875345 0
   controller "my_controller"
   turretSlot [
     InertialUnit {
