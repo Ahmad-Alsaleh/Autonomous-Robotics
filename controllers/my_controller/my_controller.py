@@ -1,104 +1,130 @@
 from controller import Robot
 import numpy as np
 
-class Controller(Robot):
-    SPEED = 6
-    GOAL = np.array([1.136, 1.136])
 
-    def __init__(self):
+class Controller(Robot):
+    MAX_SPEED = 6
+    GOAL = np.array([0, 0])
+
+    def __init__(self) -> None:
         super().__init__()
         self.timeStep = int(self.getBasicTimeStep())
-        # self.ds0 = self.getDevice('ds0')
-        # self.ds1 = self.getDevice('ds1')
-        # self.ds0.enable(self.timeStep)
-        # self.ds1.enable(self.timeStep)
-        self.pen = self.getDevice('pen')
-        self.gps = self.getDevice('gps')
+
+        self.pen = self.getDevice("pen")
+
+        self.gps = self.getDevice("gps")
         self.gps.enable(self.timeStep)
-        self.imu = self.getDevice('IMU')
+
+        self.imu = self.getDevice("IMU")
         self.imu.enable(self.timeStep)
-        # self.receiver = self.getDevice('receiver')
-        # self.receiver.enable(self.timeStep)
 
-        # Get a handler to the motors and set target position to infinity (speed control).
-        self.left_motor = self.getDevice('left wheel motor')
-        self.right_motor = self.getDevice('right wheel motor')
-        self.left_motor.setPosition(float('inf'))
-        self.right_motor.setPosition(float('inf'))
-        self.left_motor.setVelocity(0.0)
-        self.right_motor.setVelocity(0.0)
+        self.left_motor = self.getDevice("left wheel motor")
+        self.right_motor = self.getDevice("right wheel motor")
+        for motor in [self.left_motor, self.right_motor]:
+            motor.setPosition(float("inf"))
+            motor.setVelocity(0.0)
 
-        # get key presses from keyboard
         self.keyboard = self.getKeyboard()
         self.keyboard.enable(self.timeStep)
 
-    def get_position(self):
+    def get_gps_position(self) -> np.ndarray:
         return np.array(self.gps.getValues())[:2]
-    def get_orientaiton(self):
-        roll, pitch, yaw = self.imu.getRollPitchYaw()
-        return yaw
-        
-    def print_gps(self, key):
-        if key == 'G':
-            position = self.get_position()
-            print(f'GPS position: {position[0]:.3f} {position[1]:.3f}')
-        elif key == 'V':
-            speed, speed_vector_values = self.gps.getSpeed(), self.gps.getSpeedVector()
-            print(f'GPS speed vector:', speed, *speed_vector_values)
-            
-    def get_heading_angle(self, position):
-        # Calculate the heading angle to the goal
+
+    def get_orientation(self) -> np.float64:
+        """Returns the yaw angle of the robot in radians"""
+        _, _, yaw = self.imu.getRollPitchYaw()
+        return np.float64(yaw)
+
+    def print_gps_values(self) -> None:
+        key = chr(self.keyboard.getKey() & 0xFF)
+        if key == "G":
+            position = self.get_gps_position()
+            print(f"GPS position: ({position[0]:.3f}, {position[1]:.3f})")
+        elif key == "V":
+            speed_x, speed_y, _ = self.gps.getSpeedVector()
+            total_speed = self.gps.getSpeed()
+            print(
+                f"GPS speed vectors: ({speed_x:.3f}, {speed_y:.3f}). Total speed: {total_speed:.3f}"
+            )
+
+    def get_heading(self, position: np.ndarray) -> np.float64:
+        """Returns the angle between the robot's heading and the goal in radians"""
         heading_vector = Controller.GOAL - position
         return np.arctan2(heading_vector[1], heading_vector[0])
 
-    def get_proportional_control(self, target, current, Kp):
-        # Calculate the error in a way that takes into account the circular nature of angles
-        error = np.arctan2(np.sin(target - current), np.cos(target - current))
+    def get_proportional_control(self, target_angle, current_angle, Kp=0.9):
+        """Returns the proportional control output for a given target and current value."""
+        error = target_angle - current_angle
+
+        # take into account the circular nature of angles by converting the error to the range [-pi/2, pi/2]
+        error = np.arctan2(np.sin(error), np.cos(error))
+
         # Calculate the proportional control output
         return Kp * error
-    def minmax(self, x, min, max, new_min, new_max):
-        return (x - min) * (new_max - new_min) / (max - min) + new_min
 
-    def vector_to_speed(self, heading_angle, orientation, max_speed):
-        # convert heading angle to speed
+    def map(self, value, from_min, from_max, to_min, to_max):
+        """Maps a value from the range [`from_min`, `from_max`] to the range [`to_min`, `to_max`]."""
+        return (value - from_min) * (to_max - to_min) / (from_max - from_min) + to_min
+
+    def vector_to_speed(self, heading_angle, orientation):
+        """Converts heading angle to speed"""
+
         # stop if close to goal
-        position = self.get_position()
+        position = self.get_gps_position()
         distance_to_goal = np.linalg.norm(Controller.GOAL - position)
         if distance_to_goal < 0.05:  # Adjust threshold as needed
             return 0, 0
-        # print(heading_angle, orientation)
-        # if abs(heading_angle - orientation) < 0.01:
-            # return 0, 0
-        control_output = self.get_proportional_control(heading_angle, orientation, 0.9)
-        control_output = np.clip(control_output, -max_speed, max_speed)
-        left_speed = max_speed - control_output
-        right_speed = max_speed + control_output
+
+        control_output = self.get_proportional_control(heading_angle, orientation)
+
+        left_speed = Controller.MAX_SPEED - control_output
+        left_speed = np.clip(left_speed, -Controller.MAX_SPEED, Controller.MAX_SPEED)
+
+        right_speed = Controller.MAX_SPEED + control_output
+        right_speed = np.clip(right_speed, -Controller.MAX_SPEED, Controller.MAX_SPEED)
+
         speed = max(abs(left_speed), abs(right_speed))
-        left_speed *= max_speed / speed
-        right_speed *= max_speed / speed
+        left_speed *= Controller.MAX_SPEED / speed
+        right_speed *= Controller.MAX_SPEED / speed
+
         # normalize speeds
         minimum = min(left_speed, right_speed)
         maximum = max(left_speed, right_speed)
-        if minimum < -max_speed:
-            left_speed = self.minmax(left_speed, -max_speed, max_speed, -max_speed, max_speed)
-            right_speed = self.minmax(right_speed, -max_speed, max_speed, -max_speed, max_speed)
-        if maximum > max_speed:
-            left_speed = self.minmax(left_speed, minimum, maximum, -max_speed, max_speed)
-            right_speed = self.minmax(right_speed, minimum, maximum, -max_speed, max_speed)
+
+        # ! (@Alsaleh) TODO: i don't like this part. It's not clear what it does. I might remove it soon
+        if maximum > Controller.MAX_SPEED:
+            left_speed = self.map(
+                left_speed,
+                minimum,
+                maximum,
+                -Controller.MAX_SPEED,
+                Controller.MAX_SPEED,
+            )
+            right_speed = self.map(
+                right_speed,
+                minimum,
+                maximum,
+                -Controller.MAX_SPEED,
+                Controller.MAX_SPEED,
+            )
         return left_speed, right_speed
+
     def run(self):
         print("Press 'G' to read the GPS device's position")
         print("Press 'V' to read the GPS device's speed vector")
-        previous_position = None
         while self.step(self.timeStep) != -1:
-            key = chr(self.keyboard.getKey() & 0xff)
-            self.print_gps(key)
-            position = self.get_position()
-            orientation = self.get_orientaiton()
-            heading_angle = self.get_heading_angle(position)
-            left_speed, right_speed = self.vector_to_speed(heading_angle, orientation, self.SPEED)
+            self.print_gps_values()
+            position = self.get_gps_position()
+            heading_angle = self.get_heading(position)
+            orientation = self.get_orientation()
+
+            left_speed, right_speed = self.vector_to_speed(heading_angle, orientation)
             self.left_motor.setVelocity(left_speed)
             self.right_motor.setVelocity(right_speed)
+
+            print(
+                f"Position: {position}\t\tOrientation: {orientation}\t\tHeading angle: {heading_angle}"
+            )
 
 
 controller = Controller()
