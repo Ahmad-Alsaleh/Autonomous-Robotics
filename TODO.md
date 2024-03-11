@@ -6,6 +6,8 @@
 - [x] Add GPS to the robot (use the GPS demo)
 - [x] Add pen to the robot (use the pen demo)
 - [ ] Consider using PID (Proportional-Integral-Derivative) instead of proportional control
+- [ ] Fix the bug when the angle between the heading and orientation is 90 degrees. Make the robot move in a straight line or tweak the Kp value
+- [ ] Consider making the speed of the robot proportional to the distance to the goal (i.e.: take the intensity of the forces into account)
 
 # Notes
 
