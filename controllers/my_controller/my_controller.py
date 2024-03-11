@@ -28,6 +28,7 @@ class Controller(Robot):
         self.keyboard.enable(self.timeStep)
 
     def get_gps_position(self) -> np.ndarray:
+        """Returns the (x, y) position of the robot from the GPS device."""
         return np.array(self.gps.getValues())[:2]
 
     def get_orientation(self) -> np.float64:
@@ -35,7 +36,8 @@ class Controller(Robot):
         _, _, yaw = self.imu.getRollPitchYaw()
         return np.float64(yaw)
 
-    def print_gps_values(self) -> None:
+    def listen_to_key_presses(self) -> None:
+        """Prints the GPS position and speed vectors on key presses."""
         key = chr(self.keyboard.getKey() & 0xFF)
         if key == "G":
             position = self.get_gps_position()
@@ -113,7 +115,8 @@ class Controller(Robot):
         print("Press 'G' to read the GPS device's position")
         print("Press 'V' to read the GPS device's speed vector")
         while self.step(self.timeStep) != -1:
-            self.print_gps_values()
+            self.listen_to_key_presses()
+
             position = self.get_gps_position()
             heading_angle = self.get_heading(position)
             orientation = self.get_orientation()
