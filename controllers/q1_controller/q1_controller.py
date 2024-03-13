@@ -22,7 +22,14 @@ class Controller(Robot):
 
         self.imu = self.getDevice("IMU")
         self.imu.enable(self.timeStep)
-
+        
+        self.distance_sensors_angles = np.array([1.27, 0.77, 0, 5.21, 4.21, np.pi, 2.37, 1.87])
+        
+        self.distance_sensors = [self.getDevice(f'ds{i}') for i in range(8)]
+        
+        for ds in self.distance_sensors:
+            ds.enable(self.timeStep)
+        
         self.left_motor = self.getDevice("left wheel motor")
         self.right_motor = self.getDevice("right wheel motor")
         for motor in [self.left_motor, self.right_motor]:
@@ -57,6 +64,9 @@ class Controller(Robot):
         """Maps a value from the range [`from_min`, `from_max`] to the range [`to_min`, `to_max`]."""
         return (value - from_min) * (to_max - to_min) / (from_max - from_min) + to_min
 
+    def get_distances(self):
+        return np.array([ds.getValue() for ds in self.distance_sensors])
+    
     def get_motors_speeds(
         self, heading_angle: float, orientation: float
     ) -> tuple[float, float]:
@@ -67,13 +77,14 @@ class Controller(Robot):
         distance_to_goal = np.linalg.norm(self.goal - position)
         if distance_to_goal < self.distance_threshold:
             return 0, 0
-
+        
+        raw_speed = self.map(distance_to_goal, 0, 1.42, 0, Controller.MAX_SPEED)
         control_output = self.get_proportional_control(heading_angle, orientation)
 
-        left_speed = Controller.MAX_SPEED - control_output
+        left_speed = raw_speed - control_output
         left_speed = np.clip(left_speed, -Controller.MAX_SPEED, Controller.MAX_SPEED)
 
-        right_speed = Controller.MAX_SPEED + control_output
+        right_speed = raw_speed + control_output
         right_speed = np.clip(right_speed, -Controller.MAX_SPEED, Controller.MAX_SPEED)
 
         return left_speed, right_speed
@@ -89,9 +100,11 @@ class Controller(Robot):
             self.right_motor.setVelocity(right_speed)
 
             print(
-                f"Position: {position}\t\tOrientation: {orientation}\t\tHeading angle: {heading_angle}"
+                f"Position: {position}\tOrientation: {orientation}\tHeading angle: {heading_angle}"
             )
+            
+            # print(f'distances : {self.map(self.get_distances(), 0.0, 1000.0, 10.0, 0)}')
 
 
-controller = Controller(goal=np.array([0, 0]))
+controller = Controller(goal=np.array([1.136, 1.136]))
 controller.run()

@@ -8,8 +8,8 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/project
 WorldInfo {
 }
 Viewpoint {
-  orientation 0.4785896434635083 -0.47903400762058984 -0.7358521405231006 4.411242557836467
-  position 0.6364485654107691 -0.32447853941643456 2.1591829711328994
+  orientation -0.4923561862154015 0.585773098482156 0.6437819995852937 1.8343617040809523
+  position 0.17142713516487668 -0.059102301167120036 0.8153989218257282
 }
 TexturedBackground {
 }
@@ -34,6 +34,78 @@ E-puck {
       name "IMU"
     }
     GPS {
+    }
+    DistanceSensor {
+      translation 0.042 -0.011 -0.015
+      rotation 0 0 1 -0.2607996938995747
+      name "ds0"
+      lookupTable [
+        0 0 0
+        0.2 1000 0
+      ]
+    }
+    DistanceSensor {
+      translation 0.033 -0.026 -0.015
+      rotation 0 0 1 -0.7844003061004253
+      name "ds1"
+      lookupTable [
+        0 0 0
+        0.2 1000 0
+      ]
+    }
+    DistanceSensor {
+      translation 0.009 -0.032 -0.015
+      rotation 0 0 1 -1.5697996938995749
+      name "ds2"
+      lookupTable [
+        0 0 0
+        0.2 1000 0
+      ]
+    }
+    DistanceSensor {
+      translation -0.022 -0.016 -0.015
+      rotation 0 0 1 -2.66
+      name "ds3"
+      lookupTable [
+        0 0 0
+        0.2 1000 0
+      ]
+    }
+    DistanceSensor {
+      translation -0.022 0.016 -0.015
+      rotation 0 0 1 2.623185307179586
+      name "ds4"
+      lookupTable [
+        0 0 0
+        0.2 1000 0
+      ]
+    }
+    DistanceSensor {
+      translation 0.009 0.032 -0.015
+      rotation 0 0 1 1.570795613280012
+      name "ds5"
+      lookupTable [
+        0 0 0
+        0.2 1000 0
+      ]
+    }
+    DistanceSensor {
+      translation 0.033 0.026 -0.015
+      rotation 0 0 1 0.7854003061004253
+      name "ds6"
+      lookupTable [
+        0 0 0
+        0.2 1000 0
+      ]
+    }
+    DistanceSensor {
+      translation 0.042 0.011 -0.015
+      rotation 0 0 1 0.26180030610042526
+      name "ds7"
+      lookupTable [
+        0 0 0
+        0.2 1000 0
+      ]
     }
   ]
   groundSensorsSlot [
