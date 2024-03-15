@@ -5,12 +5,13 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/project
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/RectangleArena.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/gctronic/e-puck/protos/E-puck.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/obstacles/protos/OilBarrel.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/appearances/protos/MattePaint.proto"
 
 WorldInfo {
 }
 Viewpoint {
-  orientation -0.5813023956573957 0.5829683382274 0.5676578559549372 2.1065405805513895
-  position 0.5537272754760401 0.5904720810326296 2.477116138982451
+  orientation -0.37505617995569596 0.3756625373691326 0.8474730201572352 1.7339560661805682
+  position 0.9120732589671806 -2.0644428237572043 3.0045897409047084
 }
 TexturedBackground {
 }
@@ -152,4 +153,18 @@ E-puck {
       leadSize 0.004
     }
   ]
+}
+Solid {
+  translation 1.136 1.136 0
+  children [
+    Shape {
+      appearance MattePaint {
+        baseColor 0.997559 0.312535 0.19791
+      }
+      geometry Sphere {
+        radius 0.05
+      }
+    }
+  ]
+  name "goal"
 }
