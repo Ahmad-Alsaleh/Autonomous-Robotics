@@ -4,12 +4,13 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/project
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/RectangleArena.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/gctronic/e-puck/protos/E-puck.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/obstacles/protos/OilBarrel.proto"
 
 WorldInfo {
 }
 Viewpoint {
-  orientation -0.4923561862154015 0.585773098482156 0.6437819995852937 1.8343617040809523
-  position 0.17142713516487668 -0.059102301167120036 0.8153989218257282
+  orientation -0.5813023956573957 0.5829683382274 0.5676578559549372 2.1065405805513895
+  position 1.1843481058917162 0.6953014267781537 5.628356244452698
 }
 TexturedBackground {
 }
@@ -24,6 +25,24 @@ RectangleArena {
     roughness 1
     metalness 0
   }
+}
+OilBarrel {
+  translation 1.15693 0.563122 0.16
+  name "oil barrel(1)"
+  height 0.4
+  radius 0.11
+}
+OilBarrel {
+  translation 0.386765 1.07336 0.16
+  name "oil barrel(3)"
+  height 0.4
+  radius 0.11
+}
+OilBarrel {
+  translation 0.533063 0.413677 0.16
+  name "oil barrel(2)"
+  height 0.4
+  radius 0.11
 }
 E-puck {
   translation 0.127481 0.107398 -6.39511e-05
