@@ -47,7 +47,7 @@ OilBarrel {
 E-puck {
   translation 0.127481 0.107398 -6.39511e-05
   rotation 0.0029415401072643444 -0.0036433901328575646 0.999989036464969 2.35616
-  controller "q1_controller"
+  controller "robot_controller"
   turretSlot [
     InertialUnit {
       name "IMU"
