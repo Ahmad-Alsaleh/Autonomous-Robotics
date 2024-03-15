@@ -1,14 +1,29 @@
+from typing import Tuple
 from controller import Robot
 import numpy as np
 
 
 class Controller(Robot):
     MAX_SPEED = 6.2
+    RELATIVE_ANGLES_OF_DISTANCE_SENSORS = np.array(
+        [
+            1.27 - np.pi / 2,
+            0.77 - np.pi / 2,
+            -np.pi / 2,
+            -(2 * np.pi - 5.21) - np.pi / 2,
+            4.21 - np.pi / 2,
+            np.pi / 2,
+            2.37 - np.pi / 2,
+            1.87 - np.pi / 2,
+        ]
+    )
 
-    def __init__(self, goal: np.ndarray, distance_threshold: float = 0.05) -> None:
+    def __init__(
+        self, goal_position: np.ndarray, distance_threshold: float = 0.07
+    ) -> None:
         super().__init__()
 
-        self.goal = goal
+        self.goal_position = goal_position
         self.distance_threshold = distance_threshold
 
         # initialize the devices of the robot
@@ -23,22 +38,7 @@ class Controller(Robot):
         self.imu = self.getDevice("IMU")
         self.imu.enable(self.timeStep)
 
-        # self.distance_sensors_angles = np.array([1.27, 0.77, 0, 5.21, 4.21, np.pi, 2.37, 1.87])
-        self.distance_sensors_angles = np.array(
-            [
-                1.27 - np.pi / 2,
-                0.77 - np.pi / 2,
-                -np.pi / 2,
-                -(2 * np.pi - 5.21) - np.pi / 2,
-                4.21 - np.pi / 2,
-                np.pi / 2,
-                2.37 - np.pi / 2,
-                1.87 - np.pi / 2,
-            ]
-        )
-
         self.distance_sensors = [self.getDevice(f"ds{i}") for i in range(8)]
-
         for ds in self.distance_sensors:
             ds.enable(self.timeStep)
 
@@ -48,38 +48,35 @@ class Controller(Robot):
             motor.setPosition(float("inf"))
             motor.setVelocity(0.0)
 
-    def get_gps_position(self) -> np.ndarray:
+    def get_robot_position(self) -> np.ndarray:
         """Returns the (x, y) position of the robot from the GPS device."""
         return np.array(self.gps.getValues())[:2]
 
-    def get_orientation(self) -> np.float64:
+    def get_robot_angle(self) -> np.float64:
         """Returns the yaw angle of the robot in radians"""
         _, _, yaw = self.imu.getRollPitchYaw()
         return np.float64(yaw)
 
-    def get_heading(self, position: np.ndarray) -> np.ndarray:
-        """Returns the heading vector and angle between the robot's heading and the goal in radians"""
-        heading_vector = self.goal - position
-        return heading_vector, np.arctan2(heading_vector[1], heading_vector[0])
+    def get_robot_heading(self) -> Tuple[np.ndarray, np.float64]:
+        """Calculates the heading vector from the current position to the goal position."""
+        return self.goal_position - self.get_robot_position()
 
-    def get_proportional_control(self, target_angle, current_angle, Kp=0.9):
+    def filter_angle(self, angle, filter_amount=0.9):
         """Returns the proportional control output for a given target and current value."""
-        error = target_angle - current_angle
+        # changing the range of the angle to the range [-pi, pi]
+        angle = np.arctan2(np.sin(angle), np.cos(angle))
 
-        # take into account the circular nature of angles by converting the error to the range [-pi/2, pi/2]
-        error = np.arctan2(np.sin(error), np.cos(error))
+        return filter_amount * angle
 
-        # Calculate the proportional control output
-        return Kp * error
+    def map(self, value, from_lower, from_higher, to_lower, to_higher):
+        """Maps a value from the range [`from_lower`, `from_higher`] to the range [`to_lower`, `to_higher`]."""
+        mapped_value = (value - from_lower) * (to_higher - to_lower) / (
+            from_higher - from_lower
+        ) + to_lower
+        return np.clip(mapped_value, min(to_lower, to_higher), max(to_lower, to_higher))
 
-    def map(self, value, from_min, from_max, to_min, to_max):
-        """Maps a value from the range [`from_min`, `from_max`] to the range [`to_min`, `to_max`]."""
-        return (value - from_min) * (to_max - to_min) / (from_max - from_min) + to_min
-
-    def vector_from_magnitude_and_angle(
-        self, magnitude: float, angle: float
-    ) -> np.ndarray:
-        # Calculate the x and y components of the vector
+    def get_vector_components(self, magnitude: float, angle: float) -> np.ndarray:
+        """Calculate the x and y components of the vector"""
         x = magnitude * np.cos(angle)
         y = magnitude * np.sin(angle)
         return np.array([x, y])
@@ -87,70 +84,77 @@ class Controller(Robot):
     def get_distances(self) -> np.ndarray:
         return np.array([ds.getValue() for ds in self.distance_sensors])
 
-    def get_distance_vectors(self, max_magnitude=2) -> np.ndarray:
-        """return the vectors from the distances recorder from distance sensors"""
-
-        angles = self.get_orientation() + self.distance_sensors_angles
+    def get_total_repulsive_force(self, max_magnitude=4) -> np.ndarray:
+        """Return the repulsive forces relative to the obstacles distances as 2D vectors."""
+        sensors_angles = (
+            self.get_robot_angle() + Controller.RELATIVE_ANGLES_OF_DISTANCE_SENSORS
+        )
         distances = self.map(self.get_distances(), 0, 1000, max_magnitude, 0)
 
-        return np.array(
+        return -np.sum(
             [
-                self.vector_from_magnitude_and_angle(dist, angle)
-                for dist, angle in zip(distances, angles)
-            ]
+                self.get_vector_components(distance, angle)
+                for distance, angle in zip(distances, sensors_angles)
+            ],
+            axis=0,
         )
 
+    def get_total_force(self):
+        return self.get_total_repulsive_force() + self.get_robot_heading()
+
     def get_motors_speeds(
-        self, heading_vector: np.ndarray, orientation: float
+        self, distance_to_goal: float, total_force: np.ndarray
     ) -> tuple[float, float]:
         """Computes the left and right motor speeds based on the heading angle and the robot's orientation."""
-
         # stop if too close to goal
-        distance_to_goal = np.linalg.norm(heading_vector)
-        if distance_to_goal < self.distance_threshold:
+        if distance_to_goal <= self.distance_threshold:
             return 0, 0
 
-        # The -ve sign is to invert the vectors (repulsive)
-        repulsive_vectors = -self.get_distance_vectors(4)
+        raw_speed = self.map(
+            distance_to_goal, 0, self.initial_distance_to_goal, 0, Controller.MAX_SPEED
+        )
 
-        direction = heading_vector + repulsive_vectors.sum(axis=0)
-        direction_angle = np.arctan2(direction[1], direction[0])
+        target_angle = np.arctan2(total_force[1], total_force[0])
 
-        raw_speed = (
-            Controller.MAX_SPEED
-        )  # np.linalg.norm(direction) #PLAY WITH THIS LINE
+        angle_difference = target_angle - self.get_robot_angle()
+        angle_difference = self.filter_angle(angle_difference)
 
-        control_output = self.get_proportional_control(direction_angle, orientation)
-
-        left_speed = raw_speed - control_output
-        print(left_speed)
+        left_speed = raw_speed - angle_difference
         left_speed = np.clip(left_speed, -Controller.MAX_SPEED, Controller.MAX_SPEED)
-        right_speed = raw_speed + control_output
-        print(right_speed)
+
+        right_speed = raw_speed + angle_difference
         right_speed = np.clip(right_speed, -Controller.MAX_SPEED, Controller.MAX_SPEED)
-        print(direction)
-        print(raw_speed)
+
         return left_speed, right_speed
 
+    def get_initial_distance_to_goal(self) -> float:
+        self.step(self.timeStep)  # needed to enable gps
+        return np.linalg.norm(self.goal_position - self.get_robot_position())
+
+    def get_distance_to_goal(self):
+        return np.linalg.norm(self.goal_position - self.get_robot_position())
+
+    def set_motors_speeds(self, left_speed: float, right_speed: float) -> None:
+        self.left_motor.setVelocity(left_speed)
+        self.right_motor.setVelocity(right_speed)
+
     def run(self) -> None:
+        self.initial_distance_to_goal = self.get_initial_distance_to_goal()
+
         while self.step(self.timeStep) != -1:
-            position = self.get_gps_position()
-            heading_vector, heading_angle = self.get_heading(position)
-            orientation = self.get_orientation()
+            distance_to_goal = self.get_distance_to_goal()
+
+            total_force = self.get_total_force()
 
             left_speed, right_speed = self.get_motors_speeds(
-                heading_vector, orientation
+                distance_to_goal, total_force
             )
-            self.left_motor.setVelocity(left_speed)
-            self.right_motor.setVelocity(right_speed)
+            self.set_motors_speeds(left_speed, right_speed)
 
-            print(
-                f"Position: {position}\tOrientation: {orientation}\tHeading angle: {heading_angle}"
-            )
-
-            # print(f'distances :{self.map(self.get_distances(), 0, 1000, 10, 0)}')
-            # print(f'distance vectors :\n {-self.get_distance_vectors().sum(axis=0)}')
+            if distance_to_goal <= self.distance_threshold:
+                print("Goal reached!")
+                break
 
 
-controller = Controller(goal=np.array([1.136, 1.136]))
+controller = Controller(goal_position=np.array([1.14, 1.14]))
 controller.run()
