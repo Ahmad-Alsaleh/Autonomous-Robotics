@@ -10,7 +10,7 @@ WorldInfo {
 }
 Viewpoint {
   orientation -0.5813023956573957 0.5829683382274 0.5676578559549372 2.1065405805513895
-  position 1.1843481058917162 0.6953014267781537 5.628356244452698
+  position 0.5537272754760401 0.5904720810326296 2.477116138982451
 }
 TexturedBackground {
 }
@@ -60,7 +60,7 @@ E-puck {
       name "ds0"
       lookupTable [
         0 0 0
-        0.5 1000 0
+        0.3 1000 0
       ]
     }
     DistanceSensor {
@@ -69,7 +69,7 @@ E-puck {
       name "ds1"
       lookupTable [
         0 0 0
-        0.5 1000 0
+        0.3 1000 0
       ]
     }
     DistanceSensor {
@@ -78,7 +78,7 @@ E-puck {
       name "ds2"
       lookupTable [
         0 0 0
-        0.5 1000 0
+        0.3 1000 0
       ]
     }
     DistanceSensor {
@@ -87,7 +87,7 @@ E-puck {
       name "ds3"
       lookupTable [
         0 0 0
-        0.5 1000 0
+        0.3 1000 0
       ]
     }
     DistanceSensor {
@@ -96,7 +96,7 @@ E-puck {
       name "ds4"
       lookupTable [
         0 0 0
-        0.5 1000 0
+        0.3 1000 0
       ]
     }
     DistanceSensor {
@@ -105,7 +105,7 @@ E-puck {
       name "ds5"
       lookupTable [
         0 0 0
-        0.5 1000 0
+        0.3 1000 0
       ]
     }
     DistanceSensor {
@@ -114,7 +114,7 @@ E-puck {
       name "ds6"
       lookupTable [
         0 0 0
-        0.5 1000 0
+        0.3 1000 0
       ]
     }
     DistanceSensor {
@@ -123,7 +123,7 @@ E-puck {
       name "ds7"
       lookupTable [
         0 0 0
-        0.5 1000 0
+        0.3 1000 0
       ]
     }
   ]
