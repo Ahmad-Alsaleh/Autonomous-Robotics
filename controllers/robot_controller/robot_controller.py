@@ -61,10 +61,16 @@ class Controller(Robot):
         """Calculates the heading vector from the current position to the goal position."""
         return self.goal_position - self.get_robot_position()
 
-    def filter_angle(self, angle, filter_amount=0.9):
+    def filter_angle(self, angle):
         """Returns the proportional control output for a given target and current value."""
         # changing the range of the angle to the range [-pi, pi]
         angle = np.arctan2(np.sin(angle), np.cos(angle))
+
+        front_distance = min(self.get_distances()[[0, 7]])
+        if front_distance < 200:
+            filter_amount = self.map(front_distance, 0, 200, 12, 0.9)
+        else:
+            filter_amount = 0.9
 
         return filter_amount * angle
 
@@ -115,7 +121,6 @@ class Controller(Robot):
         )
 
         target_angle = np.arctan2(total_force[1], total_force[0])
-
         angle_difference = target_angle - self.get_robot_angle()
         angle_difference = self.filter_angle(angle_difference)
 
