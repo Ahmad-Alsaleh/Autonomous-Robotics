@@ -28,19 +28,31 @@ RectangleArena {
   }
 }
 OilBarrel {
-  translation 1.15693 0.563122 0.16
+  translation 0.415602 0.84324 0.16
   name "oil barrel(1)"
   height 0.4
   radius 0.11
 }
 OilBarrel {
-  translation 0.386765 1.07336 0.16
+  translation 1.05247 0.540715 0.16
+  name "oil barrel(5)"
+  height 0.4
+  radius 0.11
+}
+OilBarrel {
+  translation 1.05378 0.770022 0.16
+  name "oil barrel(4)"
+  height 0.4
+  radius 0.11
+}
+OilBarrel {
+  translation 0.811188 1.01673 0.16
   name "oil barrel(3)"
   height 0.4
   radius 0.11
 }
 OilBarrel {
-  translation 0.533063 0.413677 0.16
+  translation 0.578417 0.997727 0.16
   name "oil barrel(2)"
   height 0.4
   radius 0.11
@@ -159,7 +171,7 @@ Solid {
   children [
     Shape {
       appearance MattePaint {
-        baseColor 0.997559 0.312535 0.19791
+        baseColor 0.999527 0.988357 0.249866
       }
       geometry Sphere {
         radius 0.05
