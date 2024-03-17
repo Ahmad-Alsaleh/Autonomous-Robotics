@@ -90,7 +90,7 @@ class Controller(Robot):
     def get_distances(self) -> np.ndarray:
         return np.array([ds.getValue() for ds in self.distance_sensors])
 
-    def get_total_repulsive_force(self, max_magnitude=4) -> np.ndarray:
+    def get_total_repulsive_force(self, max_magnitude=3) -> np.ndarray:
         """Return the repulsive forces relative to the obstacles distances as 2D vectors."""
         sensors_angles = (
             self.get_robot_angle() + Controller.RELATIVE_ANGLES_OF_DISTANCE_SENSORS
@@ -116,14 +116,12 @@ class Controller(Robot):
         if distance_to_goal <= self.distance_threshold:
             return 0, 0
 
-        raw_speed = self.map(
-            distance_to_goal, 0, self.initial_distance_to_goal, 0, Controller.MAX_SPEED
-        )
-
         target_angle = np.arctan2(total_force[1], total_force[0])
         angle_difference = target_angle - self.get_robot_angle()
         angle_difference = self.filter_angle(angle_difference)
 
+        raw_speed = self.map(angle_difference, np.pi / 2, 0, 0, Controller.MAX_SPEED)
+        
         left_speed = raw_speed - angle_difference
         left_speed = np.clip(left_speed, -Controller.MAX_SPEED, Controller.MAX_SPEED)
 
