@@ -57,9 +57,10 @@ class Controller(Robot):
         _, _, yaw = self.imu.getRollPitchYaw()
         return np.float64(yaw)
 
-    def get_robot_heading(self) -> Tuple[np.ndarray, np.float64]:
+    def get_robot_heading(self, max_magnitude=0.5) -> Tuple[np.ndarray, np.float64]:
         """Calculates the heading vector from the current position to the goal position."""
-        return self.goal_position - self.get_robot_position()
+        heading = self.goal_position - self.get_robot_position()
+        return (max_magnitude / np.linalg.norm(heading)) * (heading)
 
     def filter_angle(self, angle):
         """Returns the proportional control output for a given target and current value."""
@@ -90,13 +91,16 @@ class Controller(Robot):
     def get_distances(self) -> np.ndarray:
         return np.array([ds.getValue() for ds in self.distance_sensors])
 
-    def get_total_repulsive_force(self, max_magnitude=20) -> np.ndarray:
+    def get_total_repulsive_force(
+        self, sensors: list = list(range(8)), max_magnitude=4
+    ) -> np.ndarray:
         """Return the repulsive forces relative to the obstacles distances as 2D vectors."""
         sensors_angles = (
             self.get_robot_angle() + Controller.RELATIVE_ANGLES_OF_DISTANCE_SENSORS
         )
+        sensors_angles = sensors_angles[sensors]
         distances = self.map(self.get_distances(), 0, 1000, max_magnitude, 0)
-
+        distances = distances[sensors]
         return -np.sum(
             [
                 self.get_vector_components(distance, angle)
@@ -105,8 +109,33 @@ class Controller(Robot):
             axis=0,
         )
 
+    def get_total_tangential_force(
+        self, sensors: list = list(range(8)), max_magnitude=4
+    ) -> np.ndarray:
+        """Return the clock-wise tangential forces relative to the obstacles
+        distances as 2D vectors."""
+        sensors_angles = (
+            self.get_robot_angle() + Controller.RELATIVE_ANGLES_OF_DISTANCE_SENSORS
+        )
+        sensors_angles = sensors_angles[sensors]
+        distances = self.map(self.get_distances(), 0, 1000, max_magnitude, 0)
+        distances = distances[sensors]
+        return np.sum(
+            [
+                self.get_vector_components(distance, angle + np.pi / 2)
+                for distance, angle in zip(distances, sensors_angles)
+            ],
+            axis=0,
+        )
+
     def get_total_force(self):
-        return self.get_total_repulsive_force() + self.get_robot_heading()
+        print("tan:", (tan := self.get_total_tangential_force(max_magnitude=10)))
+        print(
+            "rep:",
+            (rep := self.get_total_repulsive_force(sensors=[2, 5], max_magnitude=0.5)),
+        )
+        print("att:", (att := self.get_robot_heading(max_magnitude=0.001)))
+        return tan + rep + att
 
     def get_motors_speeds(
         self, distance_to_goal: float, total_force: np.ndarray
@@ -117,7 +146,11 @@ class Controller(Robot):
             return 0, 0
 
         raw_speed = self.map(
-            distance_to_goal, 0, self.initial_distance_to_goal, 0, Controller.MAX_SPEED
+            distance_to_goal,
+            0,
+            self.initial_distance_to_goal,
+            0,
+            Controller.MAX_SPEED / 2,
         )
 
         target_angle = np.arctan2(total_force[1], total_force[0])
@@ -150,7 +183,7 @@ class Controller(Robot):
             distance_to_goal = self.get_distance_to_goal()
 
             total_force = self.get_total_force()
-
+            print("total:", total_force)
             left_speed, right_speed = self.get_motors_speeds(
                 distance_to_goal, total_force
             )
@@ -161,5 +194,5 @@ class Controller(Robot):
                 break
 
 
-controller = Controller(goal_position=np.array([1.14, 1.14]))
+controller = Controller(goal_position=np.array([1.136, 1.136]))
 controller.run()
