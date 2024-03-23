@@ -1,7 +1,8 @@
 {
     "cSpell.words": [
         "linalg",
-        "minmax"
+        "minmax",
+        "Webot"
     ],
     "[python]": {
         "editor.defaultFormatter": "ms-python.black-formatter"

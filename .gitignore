@@ -1,6 +1,8 @@
 # custom
 worlds/.project_world.jpg
 *.docx
+.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
