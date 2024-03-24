@@ -15,7 +15,7 @@ WorldInfo {
 }
 Viewpoint {
   orientation -0.22708866491359825 -0.02917256321061952 0.9734370548851538 3.336470746580091
-  position 1.8571939504013837 0.39670939789962656 1.0597219995357432
+  position 1.962083368434483 0.31479897734060824 0.9670252609908204
 }
 TexturedBackground {
   skybox FALSE
@@ -59,7 +59,7 @@ DEF BLUE_BOX Solid {
 }
 Robot {
   translation 0.108032 -0.143689 8.88178e-16
-  rotation 0 0 1 1
+  rotation 0 0 1 1.2618
   children [
     TouchSensor {
       translation 0.045 0 0.01
@@ -72,7 +72,7 @@ Robot {
                 metalness 0
               }
               geometry Box {
-                size 0.01 0.06 0.01
+                size 0.01 0.09 0.01
               }
             }
           ]
@@ -80,7 +80,7 @@ Robot {
       ]
       name "bumper"
       boundingObject Rectangle {
-        size 0.06 0.01
+        size 0.09 0.01
       }
     }
     Pose {
@@ -115,8 +115,8 @@ Robot {
         }
       ]
       endPoint Solid {
-        translation 0 0.04499999999999971 0.025
-        rotation 0.134486954385598 -0.13448695438559805 -0.9817466670176029 1.5892169999999854
+        translation 0 0.044999999999999055 0.025
+        rotation 0.13448695438559993 -0.13448695438560018 -0.9817466670176024 1.5892169999999615
         children [
           DEF WHEEL Pose {
             rotation 0.577656895078166 0.5771968951617173 -0.5771968951617173 -2.093935
@@ -158,8 +158,8 @@ Robot {
         }
       ]
       endPoint Solid {
-        translation 0 -0.045 0.025
-        rotation -0.062357000944272024 0.062357000944274286 -0.996104015084003 1.574699999999993
+        translation 0 -0.044999999999999415 0.025
+        rotation -0.06235700094427267 0.062357000944275334 -0.996104015084003 1.574699999999973
         children [
           USE WHEEL
         ]
