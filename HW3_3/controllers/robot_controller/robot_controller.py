@@ -57,11 +57,11 @@ class Controller(Robot):
         self.right_speed = Controller.MAX_SPEED / 2
 
         self.found_cylinders = []
-
+        # the COLOR of the currently-detected cylinder
         self.current_cylinder = None
 
     def get_image_colors(self, camera):
-        """returns (red, green, blue)"""
+        """returns the summation of intensities in the 3 channels RGB"""
         width = camera.getWidth()
         height = camera.getHeight()
         image = camera.getImage()
@@ -99,8 +99,11 @@ class Controller(Robot):
         else:
             self.current_cylinder = None
 
+        if self.current_cylinder in self.found_cylinders:
+            self.current_cylinder = None
+
         if self.current_cylinder != None:
-            # self.state = RobotState.FORWARD
+            self.state = RobotState.FORWARD
             print(
                 "Looks like I found a "
                 + Controller.ANSI_COLORS[self.current_cylinder]
@@ -109,15 +112,24 @@ class Controller(Robot):
                 + " cylinder"
             )
 
+    def bumped(self):
+        return bool(self.bumper.getValue())
+
     def wander(self):
         self.left_speed = Controller.MAX_SPEED
         self.right_speed = Controller.MAX_SPEED
 
-        if self.bumper.getValue():
+        if self.bumped():
             self.state = RobotState.RECOVER
 
     def forward(self):
         """moves towards the detected cylinder until it bumps into it"""
+        if self.center_color(self.current_cylinder):
+            self.right_speed = Controller.MAX_SPEED
+            self.left_speed = Controller.MAX_SPEED
+        if self.bumped():
+            self.found_cylinders.append(self.current_cylinder)
+            self.state = RobotState.WANDER
 
     def recover(self, recovery_counter):
         if recovery_counter < Controller.RECOVERY_DURATION // 2:
@@ -132,13 +144,61 @@ class Controller(Robot):
             self.right_speed = Controller.MAX_SPEED / 4
         else:
             recovery_counter = 0
-            self.state = (
-                RobotState.WANDER
-                if self.current_cylinder == None
-                else RobotState.WANDER
-            )
+            if self.current_cylinder != None:
+                self.state = RobotState.FORWARD
+            else:
+                self.state = RobotState.WANDER
 
         return recovery_counter
+
+    def center_color(self, target_color):
+        image = self.camera.getImage()
+        width, height = self.camera.getWidth(), self.camera.getHeight()
+
+        color_positions = []
+        for x in range(width):
+            for y in range(height):
+                r = self.camera.imageGetRed(image, width, x, y)
+                g = self.camera.imageGetGreen(image, width, x, y)
+                b = self.camera.imageGetBlue(image, width, x, y)
+
+                # Define simple thresholds for red, green, and yellow
+                # TODO: make a better COLOR class with thresholds
+                is_target_color = False
+                if target_color == Colors.RED and r > 200 and g < 50 and b < 50:
+                    is_target_color = True
+                elif target_color == Colors.GREEN and g > 200 and r < 50 and b < 50:
+                    is_target_color = True
+                elif target_color == Colors.YELLOW and r > 200 and g > 200 and b < 50:
+                    is_target_color = True
+
+                if is_target_color:
+                    color_positions.append(x)
+
+        if not color_positions:
+            return False
+
+        # Find the average position of the detected color
+        average_position = sum(color_positions) / len(color_positions)
+        center_position = width / 2
+
+        threshold = width * 0.05
+
+        if average_position < center_position - threshold:
+            # Color is to the left, rotate left
+            self.left_speed = -1.0
+            self.right_speed = 1.0
+        elif average_position > center_position + threshold:
+            # Color is to the right, rotate right
+            self.left_speed = 1.0
+            self.right_speed = -1.0
+        else:
+            # Color is centered, stop rotating
+            self.left_speed = 0
+            self.right_speed = 0
+            return True  # Target color is centered
+
+        return False  # Target color is not yet centered
 
     def robot_sleep(self, duration):
         """
