@@ -14,8 +14,8 @@ WorldInfo {
   title "Camera"
 }
 Viewpoint {
-  orientation -0.4486549258235445 0.4646179558225507 0.7634388729044026 1.7759413041115506
-  position -0.04664087179361001 -1.2642220686952252 2.2730082098446127
+  orientation 0.3699717254503179 0.3566931207808853 -0.8578408593410012 1.7923140527717507
+  position 0.19373968607533712 1.529292044438448 1.782365443338879
 }
 TexturedBackground {
   skybox FALSE
@@ -62,7 +62,7 @@ Robot {
   rotation 0 0 1 1.7854
   children [
     TouchSensor {
-      translation 0.045 0 0.015
+      translation 0.048 0 0.015
       children [
         Solid {
           children [
