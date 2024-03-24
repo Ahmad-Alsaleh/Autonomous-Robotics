@@ -15,6 +15,7 @@ class Colors:
     RED = 0
     GREEN = 1
     YELLOW = 2
+    BLUE = 3
 
 
 class Direction:
@@ -24,13 +25,16 @@ class Direction:
 
 class Controller(Robot):
     # determines how much more one color should be relative to the other two
-    DETECTION_RATIO = 1.4
-    MAX_SPEED = 10
-    COLOR_NAMES = ["red", "green", "yellow"]
+    DETECTION_RATIO = 1.5
+    MAX_CENTERING_DURATION = 30
+    MAX_SPEED = 7
+    NUM_CYLINDERS = 3
+    COLOR_NAMES = ["red", "green", "yellow", "blue"]
     ANSI_COLORS = [
         AnsiCodes.RED_FOREGROUND,
         AnsiCodes.GREEN_FOREGROUND,
         AnsiCodes.YELLOW_FOREGROUND,
+        AnsiCodes.BLUE_FOREGROUND,
     ]
     RECOVERY_DURATION = 50
 
@@ -56,9 +60,9 @@ class Controller(Robot):
         self.left_speed = Controller.MAX_SPEED / 2
         self.right_speed = Controller.MAX_SPEED / 2
 
-        self.found_cylinders = []
+        self.completed_cylinders = []
         # the COLOR of the currently-detected cylinder
-        self.current_cylinder = None
+        self.current_target = None
 
     def get_image_colors(self, camera):
         """returns the summation of intensities in the 3 channels RGB"""
@@ -73,47 +77,58 @@ class Controller(Robot):
                 blue += camera.imageGetBlue(image, width, i, j)
         return red, green, blue
 
-    def detect_cylinder(self, colors):
+    def detect_target(self, colors):
         """
         sets self.current_cylinder to the appropriate value if a cylinder is detected
         """
 
         red, green, blue = colors
         # If a color is much more represented than the other ones,
-        # a cylinder is detected
+        # a cylinder (or cube) is detected
         if (
             red > Controller.DETECTION_RATIO * green
             and red > Controller.DETECTION_RATIO * blue
         ):
-            self.current_cylinder = Colors.RED
+            self.current_target = Colors.RED
         elif (
             green > Controller.DETECTION_RATIO * red
             and green > Controller.DETECTION_RATIO * blue
         ):
-            self.current_cylinder = Colors.GREEN
+            self.current_target = Colors.GREEN
         elif (
             red > Controller.DETECTION_RATIO * blue
             and green > Controller.DETECTION_RATIO * blue
         ):
-            self.current_cylinder = Colors.YELLOW
+            self.current_target = Colors.YELLOW
+        elif (
+            self.state == RobotState.RETURN
+            and blue > Controller.DETECTION_RATIO / 2 * red
+            and blue > Controller.DETECTION_RATIO / 2 * green
+        ):
+            self.current_target = Colors.BLUE
         else:
-            self.current_cylinder = None
+            self.current_target = None
 
-        if self.current_cylinder in self.found_cylinders:
-            self.current_cylinder = None
+        if self.current_target in self.completed_cylinders:
+            self.current_target = None
 
-        if self.current_cylinder != None:
+        if self.current_target != None:
             self.state = RobotState.FORWARD
+            self.stop_moving()
             print(
                 "Looks like I found a "
-                + Controller.ANSI_COLORS[self.current_cylinder]
-                + Controller.COLOR_NAMES[self.current_cylinder]
+                + Controller.ANSI_COLORS[self.current_target]
+                + Controller.COLOR_NAMES[self.current_target]
                 + AnsiCodes.RESET
                 + " cylinder"
             )
 
     def bumped(self):
         return bool(self.bumper.getValue())
+
+    def stop_moving(self):
+        self.left_motor.setVelocity(0)
+        self.right_motor.setVelocity(0)
 
     def wander(self):
         self.left_speed = Controller.MAX_SPEED
@@ -124,12 +139,16 @@ class Controller(Robot):
 
     def forward(self):
         """moves towards the detected cylinder until it bumps into it"""
-        if self.center_color(self.current_cylinder):
-            self.right_speed = Controller.MAX_SPEED
-            self.left_speed = Controller.MAX_SPEED
         if self.bumped():
-            self.found_cylinders.append(self.current_cylinder)
+            # TODO: verify we are bumping into target
+            self.completed_cylinders.append(self.current_target)
             self.state = RobotState.WANDER
+            if len(self.completed_cylinders) == Controller.NUM_CYLINDERS:
+                self.state = RobotState.RETURN
+            print(self.completed_cylinders)
+            if self.state == RobotState.WANDER:
+                print('robot completed mission, exiting...')
+                exit()
 
     def recover(self, recovery_counter):
         if recovery_counter < Controller.RECOVERY_DURATION // 2:
@@ -144,7 +163,7 @@ class Controller(Robot):
             self.right_speed = Controller.MAX_SPEED / 4
         else:
             recovery_counter = 0
-            if self.current_cylinder != None:
+            if self.current_target != None:
                 self.state = RobotState.FORWARD
             else:
                 self.state = RobotState.WANDER
@@ -213,17 +232,29 @@ class Controller(Robot):
     def run(self):
         self.state = RobotState.WANDER
         recovery_counter = 0
+        centering_counter = 0
         while self.step(self.timeStep) != -1:
             colors = self.get_image_colors(self.camera)
-            red, green, blue = colors
-
             if self.state == RobotState.WANDER:
                 self.wander()
-                self.detect_cylinder(colors)
+                self.detect_target(colors)
             elif self.state == RobotState.RECOVER:
                 recovery_counter += 1
                 recovery_counter = self.recover(recovery_counter)
+                self.detect_target(colors)
             elif self.state == RobotState.FORWARD:
+                if self.center_color(self.current_target):
+                    self.right_speed = Controller.MAX_SPEED
+                    self.left_speed = Controller.MAX_SPEED
+                    centering_counter = 0
+                else:
+                    centering_counter += 1
+                if centering_counter >= Controller.MAX_CENTERING_DURATION:
+                    centering_counter = 0
+                    self.state = RobotState.WANDER
+                self.forward()
+            elif self.state == RobotState.RETURN:
+                # TODO: implement the returning behavior
                 self.forward()
 
             self.left_speed = np.clip(
@@ -235,6 +266,8 @@ class Controller(Robot):
 
             self.left_motor.setVelocity(self.left_speed)
             self.right_motor.setVelocity(self.right_speed)
+            # self.left_motor.setVelocity(0)
+            # self.right_motor.setVelocity(0)
 
 
 controller = Controller()
