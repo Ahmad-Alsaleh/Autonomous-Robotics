@@ -25,7 +25,7 @@ class Direction:
 
 class Controller(Robot):
     # determines how much more one color should be relative to the other two
-    DETECTION_RATIO = 1.5
+    DETECTION_RATIO = 1.4
     MAX_CENTERING_DURATION = 30
     MAX_SPEED = 7
     NUM_CYLINDERS = 3
@@ -102,10 +102,11 @@ class Controller(Robot):
             self.current_target = Colors.YELLOW
         elif (
             self.state == RobotState.RETURN
-            and blue > Controller.DETECTION_RATIO / 2 * red
-            and blue > Controller.DETECTION_RATIO / 2 * green
+            and blue > Controller.DETECTION_RATIO * red
+            and blue > Controller.DETECTION_RATIO * green
         ):
             self.current_target = Colors.BLUE
+            print("base")
         else:
             self.current_target = None
 
@@ -131,8 +132,9 @@ class Controller(Robot):
         self.right_motor.setVelocity(0)
 
     def wander(self):
-        self.left_speed = Controller.MAX_SPEED
-        self.right_speed = Controller.MAX_SPEED
+        rand = np.random.uniform(-Controller.MAX_SPEED / 4, Controller.MAX_SPEED / 4)
+        self.left_speed = np.clip(self.left_speed + rand, 0, Controller.MAX_SPEED / 2)
+        self.right_speed = np.clip(self.right_speed - rand, 0, Controller.MAX_SPEED / 2)
 
         if self.bumped():
             self.state = RobotState.RECOVER
@@ -142,13 +144,13 @@ class Controller(Robot):
         if self.bumped():
             # TODO: verify we are bumping into target
             self.completed_cylinders.append(self.current_target)
-            self.state = RobotState.WANDER
+            self.state = RobotState.RECOVER
+            if self.state == RobotState.RETURN:
+                print("robot completed mission, exiting...")
+                exit()
             if len(self.completed_cylinders) == Controller.NUM_CYLINDERS:
                 self.state = RobotState.RETURN
             print(self.completed_cylinders)
-            if self.state == RobotState.WANDER:
-                print('robot completed mission, exiting...')
-                exit()
 
     def recover(self, recovery_counter):
         if recovery_counter < Controller.RECOVERY_DURATION // 2:
@@ -255,7 +257,8 @@ class Controller(Robot):
                 self.forward()
             elif self.state == RobotState.RETURN:
                 # TODO: implement the returning behavior
-                self.forward()
+                self.wander()
+                self.detect_target(colors)
 
             self.left_speed = np.clip(
                 self.left_speed, -Controller.MAX_SPEED, Controller.MAX_SPEED
