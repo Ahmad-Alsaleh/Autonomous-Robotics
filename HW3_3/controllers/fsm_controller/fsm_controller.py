@@ -59,7 +59,9 @@ class Controller(Robot):
         self.recovery_counter = 0
 
     def get_image_colors(self):
-        """returns the summation of intensities in the 3 channels RGB"""
+        """
+            returns the summation of intensities in the 3 channels RGB
+        """
         width = self.camera.getWidth()
         height = self.camera.getHeight()
         image = self.camera.getImage()
@@ -75,6 +77,10 @@ class Controller(Robot):
         return bool(self.bumper.getValue())
     
     def wander(self):
+        """ 
+            randomly chooses a value to change the motor speeds for a wandering behavior
+            update every MAX_WANDERING_COUNTER cycles 
+        """
         if self.wandering_counter >= Controller.MAX_WANDERING_COUNTER:
             rand = np.random.uniform(-Controller.MAX_SPEED / 4, Controller.MAX_SPEED / 4)
             self.left_speed = np.clip(self.left_speed + rand, 0, Controller.MAX_SPEED / 2)
@@ -84,13 +90,13 @@ class Controller(Robot):
             self.wandering_counter += 1 
     
     def detect_can(self):
+        """ 
+            detects can according to color and return the color of the detected can.
+            Return None if no can is detected
         """
-        sets self.current_cylinder to the appropriate value if a cylinder is detected
-        """
-
         red, green, blue = self.get_image_colors()
         # If a color is much more represented than the other ones,
-        # a cylinder (or cube) is detected
+        # a cylinder is detected
         if (
             red > Controller.DETECTION_RATIO * green
             and red > Controller.DETECTION_RATIO * blue
@@ -119,6 +125,9 @@ class Controller(Robot):
         return color
 
     def detect_base(self):
+        """ 
+            Similar to detect_can, but detect a blue cube. Retuns boolean (detected or not)
+        """
         red, green, blue = self.get_image_colors()
         return (
             blue > (Controller.DETECTION_RATIO - 0.2) * red
@@ -127,6 +136,7 @@ class Controller(Robot):
     
     def center_color(self, target_color):
         """
+            The function return the motor speeds to center the robot on the target
             returns a tuple (can_see_target, left_speed, right_speed)
         """
         image = self.camera.getImage()
@@ -139,7 +149,8 @@ class Controller(Robot):
                 g = self.camera.imageGetGreen(image, width, x, y)
                 b = self.camera.imageGetBlue(image, width, x, y)
 
-                # Define simple thresholds for red, green, and yellow
+                # Define simple thresholds for red, green, blue, and yellow
+                # These thresholds are experimental
                 is_target_color = False
                 if target_color == Colors.RED and r > 175 and g < 50 and b < 50:
                     is_target_color = True
@@ -171,15 +182,20 @@ class Controller(Robot):
             left_speed = 1.0
             right_speed = -1.0
         else:
-            # Color is centered, stop rotating
+            # Color is centered, go foward
             left_speed = Controller.MAX_SPEED
             right_speed = Controller.MAX_SPEED
             
         return True, left_speed, right_speed
     
     def recover(self):
+        """
+            Recovery behavior if the robot bumps into something.
+            Returns True if recovery is completed and False otherwise.
+        """
         self.recovery_counter += 1
         if self.recovery_counter < Controller.RECOVERY_DURATION // 2:
+            # reverse backwards for half a RECOVERY_DURATION
             self.left_speed = -Controller.MAX_SPEED / 2
             self.right_speed = -Controller.MAX_SPEED / 2
         elif (
@@ -187,28 +203,39 @@ class Controller(Robot):
             <= self.recovery_counter
             < Controller.RECOVERY_DURATION
         ):
+            #  rotate for the oher half of RECOVERY_DURATION
             self.left_speed = -Controller.MAX_SPEED / 4
             self.right_speed = Controller.MAX_SPEED / 4
         else:
+            # reset the counter and signal the end of recovery
             self.recovery_counter = 0
             return True
 
         return False
     
     def run(self):
+        # starting state is wander for can
         self.state = RobotState.WANDER_FOR_CAN
         while self.step(self.timeStep) != -1:
-            print(self.state)
             if self.state == RobotState.WANDER_FOR_CAN:
+                """
+                Wander until a target that has not been bumped into is detected.
+                In that case transition to FORWARD_TO_CAN. If the robot bumps,
+                transition to RECOVER_FROM_BUMP instead 
+                """
                 self.wander()
                 target = self.detect_can()
                 if target is not None and target not in self.completed_cylinders:
                     self.current_target = target
                     self.state = RobotState.FORWARD_TO_CAN
                 elif self.bumped():
+                    # the state is stored so that it can go back after recovery is done
                     self.recovered_from = RobotState.WANDER_FOR_CAN
                     self.state = RobotState.RECOVER_FROM_BUMP
             elif self.state == RobotState.FORWARD_TO_CAN:
+                """
+                In this state, center on the target and bump into it
+                """
                 see_target, left_speed, right_speed = self.center_color(self.current_target)
                 if not see_target:
                     self.state = RobotState.WANDER_FOR_CAN
@@ -217,35 +244,48 @@ class Controller(Robot):
                 self.left_speed = left_speed
                 self.right_speed = right_speed
                 if self.bumped():
+                    # if bumped append the current target into an array and trabsition to RECOVER_FROM_BUMP
                     self.state = RobotState.RECOVER_FROM_BUMP
-                    # if self.current_target and self.current_target not in self.completed_cylinders:
                     self.completed_cylinders.append(self.current_target)
-                    print('APPENDED', self.completed_cylinders)
                     if len(self.completed_cylinders) == Controller.NUM_CYLINDERS:
+                        # if we completed all cans, store WANDER_FOR_BASE so that we can go
+                        # to it after recovery is completed
                         self.recovered_from = RobotState.WANDER_FOR_BASE
                     else:
+                        # if not completed all cans, then we go back to WANDER_FOR_CAN instead
+                        # after recovery is completed
                         self.recovered_from = RobotState.WANDER_FOR_CAN
                         
             elif self.state == RobotState.RECOVER_FROM_BUMP:
                 recovered = self.recover()
                 if recovered:
+                # if recovery is done, go back to the state before recovery
                     self.state = self.recovered_from    
             elif self.state == RobotState.WANDER_FOR_BASE:
+                """
+                Wander until a base station (blue) is detected.
+                In that case transition to FORWARD_TO_BASE. If the robot bumps,
+                transition to RECOVER_FROM_BUMP instead. 
+                """
                 self.wander()
                 if self.detect_base():
                     self.current_target = Colors.BLUE
                     self.state = RobotState.FORWARD_TO_BASE
                 elif self.bumped():
+                    # store WANDER_FOR_BASE so that we can come back after recovery
                     self.recovered_from = RobotState.WANDER_FOR_BASE
                     self.state = RobotState.RECOVER_FROM_BUMP
             elif self.state == RobotState.FORWARD_TO_BASE:
+                # set the motor speeds to center on the base station
                 see_target, left_speed, right_speed = self.center_color(self.current_target)
                 if not see_target:
+                    # if base station is no longer detected go back to wandering
                     self.state = RobotState.WANDER_FOR_BASE
                     continue
                 self.left_speed = left_speed
                 self.right_speed = right_speed
                 if self.bumped():
+                    # if robot bumps into base, then the mission is completed.
                     print('Mission Completed !!!!')
                     exit()                    
 
