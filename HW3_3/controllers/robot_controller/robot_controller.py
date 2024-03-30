@@ -234,7 +234,6 @@ class Controller(Robot):
     def run(self):
         self.state = RobotState.WANDER
         recovery_counter = 0
-        centering_counter = 0
         while self.step(self.timeStep) != -1:
             colors = self.get_image_colors(self.camera)
             if self.state == RobotState.WANDER:
@@ -248,11 +247,6 @@ class Controller(Robot):
                 if self.center_color(self.current_target):
                     self.right_speed = Controller.MAX_SPEED
                     self.left_speed = Controller.MAX_SPEED
-                    centering_counter = 0
-                else:
-                    centering_counter += 1
-                if centering_counter >= Controller.MAX_CENTERING_DURATION:
-                    centering_counter = 0
                     self.state = RobotState.WANDER
                 self.forward()
             elif self.state == RobotState.RETURN:
