@@ -98,16 +98,18 @@ class Controller(Robot):
             and green > Controller.DETECTION_RATIO * blue
         ):
             self.current_target = Colors.YELLOW
+        
         else:
+            self.current_target = None
+
+        if (
             self.state == RobotState.RETURN
             and blue > Controller.DETECTION_RATIO * red
             and blue > Controller.DETECTION_RATIO * green
         ):
             self.current_target = Colors.BLUE
             print("base")
-        else:
-            self.current_target = None
-
+            
         if self.current_target in self.completed_cylinders:
             self.current_target = None
 
