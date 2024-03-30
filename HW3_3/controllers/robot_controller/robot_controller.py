@@ -2,7 +2,7 @@ from controller import Robot, Camera, AnsiCodes
 import time
 from random import random
 import numpy as np
-
+np.random.seed(42)
 
 class RobotState:
     WANDER = 1
@@ -18,15 +18,11 @@ class Colors:
     BLUE = 3
 
 
-class Direction:
-    LEFT = 0
-    RIGHT = 1
-
-
 class Controller(Robot):
     # determines how much more one color should be relative to the other two
-    DETECTION_RATIO = 1.4
+    DETECTION_RATIO = 1.55
     MAX_CENTERING_DURATION = 30
+    MAX_WANDERING_COUNTER = 10
     MAX_SPEED = 7
     NUM_CYLINDERS = 3
     COLOR_NAMES = ["red", "green", "yellow", "blue"]
@@ -63,6 +59,8 @@ class Controller(Robot):
         self.completed_cylinders = []
         # the COLOR of the currently-detected cylinder
         self.current_target = None
+        
+        self.wandering_counter = 0
 
     def get_image_colors(self, camera):
         """returns the summation of intensities in the 3 channels RGB"""
@@ -100,7 +98,7 @@ class Controller(Robot):
             and green > Controller.DETECTION_RATIO * blue
         ):
             self.current_target = Colors.YELLOW
-        elif (
+        else:
             self.state == RobotState.RETURN
             and blue > Controller.DETECTION_RATIO * red
             and blue > Controller.DETECTION_RATIO * green
@@ -132,10 +130,13 @@ class Controller(Robot):
         self.right_motor.setVelocity(0)
 
     def wander(self):
-        rand = np.random.uniform(-Controller.MAX_SPEED / 4, Controller.MAX_SPEED / 4)
-        self.left_speed = np.clip(self.left_speed + rand, 0, Controller.MAX_SPEED / 2)
-        self.right_speed = np.clip(self.right_speed - rand, 0, Controller.MAX_SPEED / 2)
-
+        if self.wandering_counter >= Controller.MAX_WANDERING_COUNTER:
+            rand = np.random.uniform(-Controller.MAX_SPEED / 4, Controller.MAX_SPEED / 4)
+            self.left_speed = np.clip(self.left_speed + rand, 0, Controller.MAX_SPEED / 2)
+            self.right_speed = np.clip(self.right_speed - rand, 0, Controller.MAX_SPEED / 2)
+            self.wandering_counter = 0
+        else:
+            self.wandering_counter += 1 
         if self.bumped():
             self.state = RobotState.RECOVER
 
@@ -197,6 +198,8 @@ class Controller(Robot):
                     color_positions.append(x)
 
         if not color_positions:
+            print('PROBLEM')
+            self.state = RobotState.WANDER
             return False
 
         # Find the average position of the detected color
@@ -247,7 +250,6 @@ class Controller(Robot):
                 if self.center_color(self.current_target):
                     self.right_speed = Controller.MAX_SPEED
                     self.left_speed = Controller.MAX_SPEED
-                    self.state = RobotState.WANDER
                 self.forward()
             elif self.state == RobotState.RETURN:
                 # TODO: implement the returning behavior
