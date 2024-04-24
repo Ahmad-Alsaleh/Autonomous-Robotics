@@ -1,0 +1,170 @@
+#VRML_SIM R2023b utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/RectangleArena.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/gctronic/e-puck/protos/E-puck.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/obstacles/protos/OilBarrel.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/appearances/protos/MattePaint.proto"
+
+WorldInfo {
+}
+Viewpoint {
+  orientation -0.5815753560419158 0.5164999039092423 0.6284886271894363 2.123418723420048
+  position 0.7456863828226057 0.22049131309667727 5.650901161331089
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  translation 0.71 0.71 0
+  floorSize 1.42 1.42
+  floorTileSize 1.42 1.42
+  floorAppearance PBRAppearance {
+    baseColor 0 0.4 0.5
+    roughness 1
+    metalness 0
+  }
+}
+OilBarrel {
+  translation 1.15693 0.563122 0.16
+  name "oil barrel(1)"
+  height 0.4
+  radius 0.11
+}
+OilBarrel {
+  translation 0.386765 1.07336 0.16
+  name "oil barrel(3)"
+  height 0.4
+  radius 0.11
+}
+OilBarrel {
+  translation 0.533063 0.413677 0.16
+  name "oil barrel(2)"
+  height 0.4
+  radius 0.11
+}
+E-puck {
+  translation 0.652254 0.260689 -6.39511e-05
+  rotation 0.0029415401072643444 -0.0036433901328575646 0.999989036464969 2.35616
+  controller "robot_controller"
+  turretSlot [
+    InertialUnit {
+      name "IMU"
+    }
+    GPS {
+    }
+    DistanceSensor {
+      translation 0.042 -0.011 -0.015
+      rotation 0 0 1 -0.2607996938995747
+      name "ds0"
+      lookupTable [
+        0 0 0
+        0.3 1000 0
+      ]
+    }
+    DistanceSensor {
+      translation 0.033 -0.026 -0.015
+      rotation 0 0 1 -0.7844003061004253
+      name "ds1"
+      lookupTable [
+        0 0 0
+        0.3 1000 0
+      ]
+    }
+    DistanceSensor {
+      translation 0.009 -0.032 -0.015
+      rotation 0 0 1 -1.5697996938995749
+      name "ds2"
+      lookupTable [
+        0 0 0
+        0.3 1000 0
+      ]
+    }
+    DistanceSensor {
+      translation -0.022 -0.016 -0.015
+      rotation 0 0 1 -2.66
+      name "ds3"
+      lookupTable [
+        0 0 0
+        0.3 1000 0
+      ]
+    }
+    DistanceSensor {
+      translation -0.022 0.016 -0.015
+      rotation 0 0 1 2.623185307179586
+      name "ds4"
+      lookupTable [
+        0 0 0
+        0.3 1000 0
+      ]
+    }
+    DistanceSensor {
+      translation 0.009 0.032 -0.015
+      rotation 0 0 1 1.570795613280012
+      name "ds5"
+      lookupTable [
+        0 0 0
+        0.3 1000 0
+      ]
+    }
+    DistanceSensor {
+      translation 0.033 0.026 -0.015
+      rotation 0 0 1 0.7854003061004253
+      name "ds6"
+      lookupTable [
+        0 0 0
+        0.3 1000 0
+      ]
+    }
+    DistanceSensor {
+      translation 0.042 0.011 -0.015
+      rotation 0 0 1 0.26180030610042526
+      name "ds7"
+      lookupTable [
+        0 0 0
+        0.3 1000 0
+      ]
+    }
+  ]
+  groundSensorsSlot [
+    Pen {
+      translation -0.06 0 0.001
+      children [
+        Pose {
+          translation 0 0 0.0342
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 1 0.8 0
+                metalness 0
+              }
+              geometry Cylinder {
+                height 0.07
+                radius 0.004
+              }
+            }
+          ]
+        }
+      ]
+      inkColor 0.8 0 0
+      inkDensity 0.2
+      leadSize 0.004
+    }
+  ]
+}
+Solid {
+  translation 1.136 1.136 0
+  children [
+    Shape {
+      appearance MattePaint {
+        baseColor 0.997559 0.312535 0.19791
+      }
+      geometry Sphere {
+        radius 0.05
+      }
+    }
+  ]
+  name "goal"
+}
