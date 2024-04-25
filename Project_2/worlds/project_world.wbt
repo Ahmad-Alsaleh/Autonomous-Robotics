@@ -4,50 +4,31 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/project
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/RectangleArena.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/gctronic/e-puck/protos/E-puck.proto"
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/obstacles/protos/OilBarrel.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/appearances/protos/MattePaint.proto"
 
 WorldInfo {
 }
 Viewpoint {
-  orientation -0.5815753560419158 0.5164999039092423 0.6284886271894363 2.123418723420048
-  position 0.7456863828226057 0.22049131309667727 5.650901161331089
+  orientation -0.4868820874404294 0.4632954142353163 0.7404749773477675 1.9139811357797818
+  position 0.6260536786047785 -0.7649317436922985 3.2036862459778463
 }
 TexturedBackground {
 }
 TexturedBackgroundLight {
 }
 RectangleArena {
-  translation 0.71 0.71 0
-  floorSize 1.42 1.42
-  floorTileSize 1.42 1.42
+  translation 0.56 0.56 0
+  floorSize 1.12 1.12
+  floorTileSize 1.12 1.12
   floorAppearance PBRAppearance {
     baseColor 0 0.4 0.5
     roughness 1
     metalness 0
   }
 }
-OilBarrel {
-  translation 1.15693 0.563122 0.16
-  name "oil barrel(1)"
-  height 0.4
-  radius 0.11
-}
-OilBarrel {
-  translation 0.386765 1.07336 0.16
-  name "oil barrel(3)"
-  height 0.4
-  radius 0.11
-}
-OilBarrel {
-  translation 0.533063 0.413677 0.16
-  name "oil barrel(2)"
-  height 0.4
-  radius 0.11
-}
 E-puck {
-  translation 0.652254 0.260689 -6.39511e-05
-  rotation 0.0029415401072643444 -0.0036433901328575646 0.999989036464969 2.35616
+  translation 0.91413 0.115722 -0.0004479
+  rotation 0.0387313133659297 -0.04640961601566307 -0.9981713444625772 -0.23343530717958583
   controller "robot_controller"
   turretSlot [
     InertialUnit {
@@ -155,7 +136,7 @@ E-puck {
   ]
 }
 Solid {
-  translation 1.136 1.136 0
+  translation 0.8 0.8 0
   children [
     Shape {
       appearance MattePaint {

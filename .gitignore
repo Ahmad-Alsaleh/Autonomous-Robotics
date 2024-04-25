@@ -1,7 +1,7 @@
 # custom
 worlds/.project_world.jpg
-*.docx
 .DS_Store
+Project_2/Answer/~$nswers.docx
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

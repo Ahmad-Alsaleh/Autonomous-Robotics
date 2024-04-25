@@ -3,7 +3,7 @@ from controller import Robot
 import numpy as np
 
 
-class Controller(Robot):
+class APFController(Robot):
     MAX_SPEED = 6.2
     RELATIVE_ANGLES_OF_DISTANCE_SENSORS = np.array(
         [
@@ -90,10 +90,10 @@ class Controller(Robot):
     def get_distances(self) -> np.ndarray:
         return np.array([ds.getValue() for ds in self.distance_sensors])
 
-    def get_total_repulsive_force(self, max_magnitude=4) -> np.ndarray:
+    def get_total_repulsive_force(self, max_magnitude=20) -> np.ndarray:
         """Return the repulsive forces relative to the obstacles distances as 2D vectors."""
         sensors_angles = (
-            self.get_robot_angle() + Controller.RELATIVE_ANGLES_OF_DISTANCE_SENSORS
+            self.get_robot_angle() + APFController.RELATIVE_ANGLES_OF_DISTANCE_SENSORS
         )
         distances = self.map(self.get_distances(), 0, 1000, max_magnitude, 0)
 
@@ -108,16 +108,24 @@ class Controller(Robot):
     def get_total_force(self):
         return self.get_total_repulsive_force() + self.get_robot_heading()
 
-    def get_motors_speeds(
-        self, distance_to_goal: float, total_force: np.ndarray
-    ) -> tuple[float, float]:
+    def get_motors_speeds(self) -> tuple[float, float]:
         """Computes the left and right motor speeds based on the heading angle and the robot's orientation."""
+
+        distance_to_goal = self.get_distance_to_goal()
+
+        total_force = self.get_total_force()
+
         # stop if too close to goal
         if distance_to_goal <= self.distance_threshold:
+            print("Goal reached")
             return 0, 0
 
         raw_speed = self.map(
-            distance_to_goal, 0, self.initial_distance_to_goal, 0, Controller.MAX_SPEED
+            distance_to_goal,
+            0,
+            self.initial_distance_to_goal,
+            0,
+            APFController.MAX_SPEED,
         )
 
         target_angle = np.arctan2(total_force[1], total_force[0])
@@ -125,16 +133,22 @@ class Controller(Robot):
         angle_difference = self.filter_angle(angle_difference)
 
         left_speed = raw_speed - angle_difference
-        left_speed = np.clip(left_speed, -Controller.MAX_SPEED, Controller.MAX_SPEED)
+        left_speed = np.clip(
+            left_speed, -APFController.MAX_SPEED, APFController.MAX_SPEED
+        )
 
         right_speed = raw_speed + angle_difference
-        right_speed = np.clip(right_speed, -Controller.MAX_SPEED, Controller.MAX_SPEED)
+        right_speed = np.clip(
+            right_speed, -APFController.MAX_SPEED, APFController.MAX_SPEED
+        )
 
         return left_speed, right_speed
 
-    def get_initial_distance_to_goal(self) -> float:
+    def set_initial_distance_to_goal(self) -> float:
         self.step(self.timeStep)  # needed to enable gps
-        return np.linalg.norm(self.goal_position - self.get_robot_position())
+        self.initial_distance_to_goal = np.linalg.norm(
+            self.goal_position - self.get_robot_position()
+        )
 
     def get_distance_to_goal(self):
         return np.linalg.norm(self.goal_position - self.get_robot_position())
@@ -143,23 +157,16 @@ class Controller(Robot):
         self.left_motor.setVelocity(left_speed)
         self.right_motor.setVelocity(right_speed)
 
-    def run(self) -> None:
-        self.initial_distance_to_goal = self.get_initial_distance_to_goal()
 
-        while self.step(self.timeStep) != -1:
-            distance_to_goal = self.get_distance_to_goal()
-
-            total_force = self.get_total_force()
-
-            left_speed, right_speed = self.get_motors_speeds(
-                distance_to_goal, total_force
-            )
-            self.set_motors_speeds(left_speed, right_speed)
-
-            if distance_to_goal <= self.distance_threshold:
-                print("Goal reached!")
-                break
+apf_controller = APFController(goal_position=np.array([0.8, 0.8]))
 
 
-controller = Controller(goal_position=np.array([1.14, 1.14]))
-controller.run()
+def run() -> None:
+    apf_controller.set_initial_distance_to_goal()
+
+    while apf_controller.step(apf_controller.timeStep) != -1:
+        left_speed, right_speed = apf_controller.get_motors_speeds()
+        apf_controller.set_motors_speeds(left_speed, right_speed)
+
+
+run()
