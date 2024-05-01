@@ -4,8 +4,8 @@ from apf_controller import APFController
 
 
 if __name__ == "__main__":
-    width = 1.19 / 33
-    height = 1.19 / 30
+    width = 1.12 / 33
+    height = 1.12 / 30
 
     p0 = Waypoint(2 * width, 1.19 - 2 * height, "p0")
     p1 = Waypoint(4 * width, 1.19 - 3 * height, "p1")
