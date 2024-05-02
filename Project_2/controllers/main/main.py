@@ -6,9 +6,26 @@ from path_finder import DeliberativeLayer
 if __name__ == "__main__":
     width = 1.12 / 33
     height = 1.12 / 30
-
-    start = Waypoint(2 * width, 1.12 - 2 * height, "start")
-    goal = Waypoint(1.12 - 10 * width, 3 * height, "goal")
+    tests = {
+        'test1': {
+            "start": (2 * width, 1.12 - 2 * height),
+            "goal": (13 * width, 1.12 - 16 * height)
+        },
+        'test2': {
+            'start': (22 * width, 1.12 - 3 * height), 
+            'goal': (16 * width, 3 * height)
+        },
+        'test3': {
+            'start': (2 * width, 13 * height),
+            'goal':(1.12 - 5 * width, 10 * height)
+        },
+        'test4': {
+            'start': (13 * width, 1.12 - 3 * height),
+            'goal': (1.12 - 10 * width, 3 * height)
+        }
+    }
+    start = Waypoint(*tests["test4"]["start"], "start")
+    goal = Waypoint(*tests["test4"]["goal"], "goal")
     p1 = Waypoint(5 * width, 1.12 - 4 * height, "p1")
     p2 = Waypoint(11 * width, 1.12 - 2 * height, "p2")
     p3 = Waypoint(5 * width, 1.12 - 9 * height, "p3")

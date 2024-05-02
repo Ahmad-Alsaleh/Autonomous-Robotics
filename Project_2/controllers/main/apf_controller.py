@@ -3,13 +3,6 @@ from robot import Robot
 from path_finder import Waypoint, Path, DeliberativeLayer, PathTraversalCompleted, _euclidean_distance
 import numpy as np
 
-
-class EmptyPath(Exception):
-    def __init__(self, message: str = None):
-        self.message = message if message is not None else "The provided path is empty."
-        super().__init__(self.message)
-
-
 class APFController:
     def __init__(
         self,
@@ -24,7 +17,6 @@ class APFController:
         self.__deliberative_layer = deliberative_layer
         
         self.__robot.simulator_step() # essential to enable gps in order to obtain intial distance to goal
-        self.__initial_distance_to_goal = self.__get_distance_to_goal()
         
         self.__destination = self.__get_destination()
         
@@ -42,18 +34,12 @@ class APFController:
         heading = self.__get_heading_vector()
         return (max_magnitude / np.linalg.norm(heading)) * (heading)
 
-    def __get_distance_to_goal(self) -> float:
-        return np.linalg.norm(
-            self.__deliberative_layer.get_goal().to_numpy() - self.__robot.get_current_position()
-            )
     def __get_distance_to_waypoint(self) -> float:
         return np.linalg.norm(self.__get_heading_vector())
 
     def __filter_angle(self, angle: float) -> float:
         """Returns the proportional control output for a given target and current value."""
-        # changing the range of the angle to the range [-pi, pi]
-        angle = np.arctan2(np.sin(angle), np.cos(angle))
-
+    
         front_distance = self.__robot.get_front_distance()
 
         filter_amount = (
@@ -104,7 +90,6 @@ class APFController:
 
     def compute_motors_speed(self) -> Tuple[float, float]:
         distance_to_waipoint = self.__get_distance_to_waypoint()
-        distance_to_goal = self.__get_distance_to_goal()
         total_force = self.__get_total_force()
 
         # stop if too close to the goal
@@ -118,16 +103,20 @@ class APFController:
                 self.__final_goal_reached = True
                 return 0, 0
 
-        raw_speed = self.__map(
-            distance_to_waipoint,
-            0,
-            self.__initial_distance_to_goal,
-            0,
-            self.__robot.MAX_SPEED,
-        )
+        
 
         target_goal = np.arctan2(total_force[1], total_force[0])
         angle_difference = target_goal - self.__robot.get_current_angle()
+        # changing the range of the angle to the range [-pi, pi]
+        angle_difference = np.arctan2(np.sin(angle_difference), np.cos(angle_difference))
+
+        raw_speed = self.__map(
+            abs(angle_difference),
+            np.pi/2,
+            0,
+            0,
+            self.__robot.MAX_SPEED,
+        )
         angle_difference = self.__filter_angle(angle_difference)
 
         left_speed = raw_speed - angle_difference

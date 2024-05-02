@@ -143,11 +143,28 @@ class DeliberativeLayer:
 if __name__ == "__main__":
     width = 1.12 / 33
     height = 1.12 / 30
-
-    start = Waypoint(13 * width, 1.12 - 3 * height, "start")
-    goal = Waypoint(1.12 - 10 * width, 3 * height, "goal")
-    p1 = Waypoint(4 * width, 1.12 - 3 * height, "p1")
-    p2 = Waypoint(10 * width, 1.12 - 2 * height, "p2")
+    tests = {
+        'test1': {
+            "start": (2 * width, 1.12 - 2 * height),
+            "goal": (13 * width, 1.12 - 16 * height)
+        },
+        'test2': {
+            'start': (22 * width, 1.12 - 3 * height), 
+            'goal': (16 * width, 3 * height)
+        },
+        'test3': {
+            'start': (2 * width, 13 * height),
+            'goal':(1.12 - 5 * width, 10 * height)
+        },
+        'test4': {
+            'start': (13 * width, 1.12 - 3 * height),
+            'goal': (1.12 - 10 * width, 3 * height)
+        }
+    }
+    start = Waypoint(*tests["test1"]["start"], "start")
+    goal = Waypoint(*tests["test1"]["goal"], "goal")
+    p1 = Waypoint(5 * width, 1.12 - 4 * height, "p1")
+    p2 = Waypoint(11 * width, 1.12 - 2 * height, "p2")
     p3 = Waypoint(5 * width, 1.12 - 9 * height, "p3")
     p4 = Waypoint(15 * width, 1.12 - 9 * height, "p4")
     p5 = Waypoint(25 * width, 1.12 - 4 * height, "p5")
@@ -161,7 +178,8 @@ if __name__ == "__main__":
     p14 = Waypoint(3 * width, 1.12 - 21 * height, "p14")
     p15 = Waypoint(3 * width, 1.12 - 13 * height, "p15")
     p16 = Waypoint(10 * width, 1.12 - 17 * height, "p16")
-    p17 = Waypoint(14 * width, 1.12 - 14 * height, "p17")
+    p17 = Waypoint(15 * width, 1.12 - 14 * height, "p17")
+
 
     graph = {
         p1: [p2, p3],
@@ -183,5 +201,12 @@ if __name__ == "__main__":
     }
     graph = Graph(graph, start=start, goal=goal)
     path = DeliberativeLayer.find_path(graph)
-    print(f"Path to follow: {path}")
+    print(path)
+    dl = DeliberativeLayer(graph)
+    dl.generate_path()
+    while True:
+        try:
+            print(dl.get_next_waypoint())
+        except PathTraversalCompleted:
+            break
 
