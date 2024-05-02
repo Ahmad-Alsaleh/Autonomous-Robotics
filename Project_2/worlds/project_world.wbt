@@ -10,8 +10,8 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/project
 WorldInfo {
 }
 Viewpoint {
-  orientation -0.5632179211561722 0.5669400080168823 0.6011360915785521 2.051177069114914
-  position 0.7144830616066069 0.34185739730667336 2.933660326575696
+  orientation -0.578171704113083 0.5712216999982856 0.582600420540564 2.0950000141292158
+  position 0.5959617918710165 0.42074624261144156 2.6182250725160414
 }
 TexturedBackground {
 }
@@ -28,8 +28,8 @@ RectangleArena {
   }
 }
 E-puck {
-  translation 0.91413 0.115722 -0.0004479
-  rotation 0.0387313133659297 -0.04640961601566307 -0.9981713444625772 -0.23343530717958583
+  translation 0.068 1.045 -0.0004479
+  rotation -0.01101169598682545 0.0012114595584877502 -0.9999386355758197 1.37711
   controller "main"
   turretSlot [
     InertialUnit {
@@ -43,7 +43,7 @@ E-puck {
       name "ds0"
       lookupTable [
         0 0 0
-        0.3 1000 0
+        0.05 1000 0
       ]
     }
     DistanceSensor {
@@ -52,7 +52,7 @@ E-puck {
       name "ds1"
       lookupTable [
         0 0 0
-        0.3 1000 0
+        0.05 1000 0
       ]
     }
     DistanceSensor {
@@ -61,7 +61,7 @@ E-puck {
       name "ds2"
       lookupTable [
         0 0 0
-        0.3 1000 0
+        0.05 1000 0
       ]
     }
     DistanceSensor {
@@ -70,7 +70,7 @@ E-puck {
       name "ds3"
       lookupTable [
         0 0 0
-        0.3 1000 0
+        0.05 1000 0
       ]
     }
     DistanceSensor {
@@ -79,7 +79,7 @@ E-puck {
       name "ds4"
       lookupTable [
         0 0 0
-        0.3 1000 0
+        0.05 1000 0
       ]
     }
     DistanceSensor {
@@ -88,7 +88,7 @@ E-puck {
       name "ds5"
       lookupTable [
         0 0 0
-        0.3 1000 0
+        0.05 1000 0
       ]
     }
     DistanceSensor {
@@ -97,7 +97,7 @@ E-puck {
       name "ds6"
       lookupTable [
         0 0 0
-        0.3 1000 0
+        0.05 1000 0
       ]
     }
     DistanceSensor {
@@ -106,7 +106,7 @@ E-puck {
       name "ds7"
       lookupTable [
         0 0 0
-        0.3 1000 0
+        0.05 1000 0
       ]
     }
   ]
@@ -137,7 +137,7 @@ E-puck {
   ]
 }
 Solid {
-  translation 0.8 0.8 0
+  translation 0.17 0.97 0
   children [
     Shape {
       appearance MattePaint {
@@ -148,7 +148,217 @@ Solid {
       }
     }
   ]
-  name "goal"
+  name "p1"
+}
+Solid {
+  translation 0.373 1.045 0
+  children [
+    Shape {
+      appearance MattePaint {
+        baseColor 0.997559 0.312535 0.19791
+      }
+      geometry Sphere {
+        radius 0.05
+      }
+    }
+  ]
+  name "p2"
+}
+Solid {
+  translation 0.17 0.784 0
+  children [
+    Shape {
+      appearance MattePaint {
+        baseColor 0.997559 0.312535 0.19791
+      }
+      geometry Sphere {
+        radius 0.05
+      }
+    }
+  ]
+  name "p3"
+}
+Solid {
+  translation 0.509 0.784 0
+  children [
+    Shape {
+      appearance MattePaint {
+        baseColor 0.997559 0.312535 0.19791
+      }
+      geometry Sphere {
+        radius 0.05
+      }
+    }
+  ]
+  name "p4"
+}
+Solid {
+  translation 0.848 0.971 0
+  children [
+    Shape {
+      appearance MattePaint {
+        baseColor 0.997559 0.312535 0.19791
+      }
+      geometry Sphere {
+        radius 0.05
+      }
+    }
+  ]
+  name "p5"
+}
+Solid {
+  translation 0.848 0.784 0
+  children [
+    Shape {
+      appearance MattePaint {
+        baseColor 0.997559 0.312535 0.19791
+      }
+      geometry Sphere {
+        radius 0.05
+      }
+    }
+  ]
+  name "p6"
+}
+Solid {
+  translation 1.052 0.784 0
+  children [
+    Shape {
+      appearance MattePaint {
+        baseColor 0.997559 0.312535 0.19791
+      }
+      geometry Sphere {
+        radius 0.05
+      }
+    }
+  ]
+  name "p7"
+}
+Solid {
+  translation 0.713 0.411 0
+  children [
+    Shape {
+      appearance MattePaint {
+        baseColor 0.997559 0.312535 0.19791
+      }
+      geometry Sphere {
+        radius 0.05
+      }
+    }
+  ]
+  name "p12"
+}
+Solid {
+  translation 0.697 0.149 0
+  children [
+    Shape {
+      appearance MattePaint {
+        baseColor 0.997559 0.312535 0.19791
+      }
+      geometry Sphere {
+        radius 0.05
+      }
+    }
+  ]
+  name "p10"
+}
+Solid {
+  translation 0.509 0.597 0
+  children [
+    Shape {
+      appearance MattePaint {
+        baseColor 0.997559 0.312535 0.19791
+      }
+      geometry Sphere {
+        radius 0.05
+      }
+    }
+  ]
+  name "p17"
+}
+Solid {
+  translation 1.052 0.485 0
+  children [
+    Shape {
+      appearance MattePaint {
+        baseColor 0.997559 0.312535 0.19791
+      }
+      geometry Sphere {
+        radius 0.05
+      }
+    }
+  ]
+  name "p8"
+}
+Solid {
+  translation 1.018 0.075 0
+  children [
+    Shape {
+      appearance MattePaint {
+        baseColor 0.997559 0.312535 0.19791
+      }
+      geometry Sphere {
+        radius 0.05
+      }
+    }
+  ]
+  name "p9"
+}
+Solid {
+  translation 0.136 0.149 0
+  children [
+    Shape {
+      appearance MattePaint {
+        baseColor 0.997559 0.312535 0.19791
+      }
+      geometry Sphere {
+        radius 0.05
+      }
+    }
+  ]
+  name "p13"
+}
+Solid {
+  translation 0.102 0.336 0
+  children [
+    Shape {
+      appearance MattePaint {
+        baseColor 0.997559 0.312535 0.19791
+      }
+      geometry Sphere {
+        radius 0.05
+      }
+    }
+  ]
+  name "p14"
+}
+Solid {
+  translation 0.102 0.635 0
+  children [
+    Shape {
+      appearance MattePaint {
+        baseColor 0.997559 0.312535 0.19791
+      }
+      geometry Sphere {
+        radius 0.05
+      }
+    }
+  ]
+  name "p15"
+}
+Solid {
+  translation 0.339 0.485 0
+  children [
+    Shape {
+      appearance MattePaint {
+        baseColor 0.997559 0.312535 0.19791
+      }
+      geometry Sphere {
+        radius 0.05
+      }
+    }
+  ]
+  name "p16"
 }
 SolidBox {
   translation 0.904974 0.405443 0.04

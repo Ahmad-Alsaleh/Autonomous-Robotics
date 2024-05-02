@@ -1,6 +1,6 @@
 from typing import Iterator, Tuple
 from robot import Robot
-from path_finder import Waypoint, Path
+from path_finder import Waypoint, Path, DeliberativeLayer, PathTraversalCompleted
 import numpy as np
 
 
@@ -14,19 +14,25 @@ class APFController:
     def __init__(
         self,
         robot: Robot,
+        deliberative_layer: DeliberativeLayer,
         *,
-        path: Path,
         distance_to_goal_threshold: float = 0.1,
     ) -> None:
         self.__robot = robot
-        self.__path: Iterator[Waypoint] = iter(path)
+        # self.__path: Iterator[Waypoint] = iter(path)
         self.__distance_threshold = distance_to_goal_threshold
         self.__initial_distance_to_goal: float | None = None
         self.__final_goal_reached: bool = False
-        try:
-            self.__destination = next(self.__path)
-        except StopIteration as e:
-            raise EmptyPath from e
+        self.__deliberative_layer = deliberative_layer
+        # try:
+        #     self.__destination = next(self.__path)
+        # except StopIteration as e:
+        #     raise EmptyPath from e
+        
+
+    def get_destination(self) -> Waypoint:
+        
+        self.__deliberative_layer.get_next_waypoint()    
 
     def __get_heading_vector(self) -> np.ndarray:
         """Calculates the heading vector from the current position to the goal position."""
@@ -101,7 +107,7 @@ class APFController:
             try:
                 self.__destination = next(self.__path)
                 print(f"Going to {self.__destination}.")
-            except StopIteration:
+            except PathTraversalCompleted:
                 print("Final goal reached!!")
                 self.__final_goal_reached = True
                 return 0, 0
