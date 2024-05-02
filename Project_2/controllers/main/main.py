@@ -1,5 +1,5 @@
 from robot import Robot
-from path_finder import Graph, find_path, Waypoint, Path
+from path_finder import Graph, Waypoint, Path
 from apf_controller import APFController
 from path_finder import DeliberativeLayer
 
@@ -8,7 +8,7 @@ if __name__ == "__main__":
     height = 1.12 / 30
 
     start = Waypoint(2 * width, 1.12 - 2 * height, "start")
-    goal = Waypoint(13 * width, 1.12 - 16 * height, "goal")
+    goal = Waypoint(1.12 - 10 * width, 3 * height, "goal")
     p1 = Waypoint(5 * width, 1.12 - 4 * height, "p1")
     p2 = Waypoint(11 * width, 1.12 - 2 * height, "p2")
     p3 = Waypoint(5 * width, 1.12 - 9 * height, "p3")
@@ -49,8 +49,8 @@ if __name__ == "__main__":
 
     robot = Robot()
     deliberative_layer = DeliberativeLayer(graph)
-
-    speed_controller = APFController(robot, deliberative_layer)
+    deliberative_layer.generate_path()
+    speed_controller = APFController(robot, deliberative_layer, distance_to_goal_threshold=0.05)
 
     while robot.simulator_step() != -1:
         left_speed, right_speed = speed_controller.compute_motors_speed()

@@ -1,6 +1,6 @@
 from typing import Iterator, Tuple
 from robot import Robot
-from path_finder import Waypoint, Path, DeliberativeLayer, PathTraversalCompleted
+from path_finder import Waypoint, Path, DeliberativeLayer, PathTraversalCompleted, _euclidean_distance
 import numpy as np
 
 
@@ -19,26 +19,34 @@ class APFController:
         distance_to_goal_threshold: float = 0.1,
     ) -> None:
         self.__robot = robot
-        # self.__path: Iterator[Waypoint] = iter(path)
         self.__distance_threshold = distance_to_goal_threshold
-        self.__initial_distance_to_goal: float | None = None
         self.__final_goal_reached: bool = False
         self.__deliberative_layer = deliberative_layer
-        # try:
-        #     self.__destination = next(self.__path)
-        # except StopIteration as e:
-        #     raise EmptyPath from e
+        
+        self.__robot.simulator_step() # essential to enable gps in order to obtain intial distance to goal
+        self.__initial_distance_to_goal = self.__get_distance_to_goal()
+        
+        self.__destination = self.__get_destination()
+        
         
 
-    def get_destination(self) -> Waypoint:
+    def __get_destination(self) -> Waypoint:
         
-        self.__deliberative_layer.get_next_waypoint()    
+        return self.__deliberative_layer.get_next_waypoint()    
 
     def __get_heading_vector(self) -> np.ndarray:
         """Calculates the heading vector from the current position to the goal position."""
         return self.__destination.to_numpy() - self.__robot.get_current_position()
 
+    def __get_attractive_force(self, max_magnitude= 5) -> np.ndarray:
+        heading = self.__get_heading_vector()
+        return (max_magnitude / np.linalg.norm(heading)) * (heading)
+
     def __get_distance_to_goal(self) -> float:
+        return np.linalg.norm(
+            self.__deliberative_layer.get_goal().to_numpy() - self.__robot.get_current_position()
+            )
+    def __get_distance_to_waypoint(self) -> float:
         return np.linalg.norm(self.__get_heading_vector())
 
     def __filter_angle(self, angle: float) -> float:
@@ -69,7 +77,7 @@ class APFController:
         y = magnitude * np.sin(angle)
         return np.array([x, y])
 
-    def __get_total_repulsive_force(self, max_magnitude: float = 20) -> np.ndarray:
+    def __get_total_repulsive_force(self, max_magnitude: float = 10) -> np.ndarray:
         """Return the repulsive forces relative to the obstacles distances as 2D vectors."""
         distances = self.__map(
             self.__robot.get_distances(),
@@ -89,23 +97,21 @@ class APFController:
 
     def __get_total_force(self) -> np.ndarray:
         """Sums the repulsive force with the attractive force"""
-        return self.__get_total_repulsive_force() + self.__get_heading_vector()
+        return self.__get_total_repulsive_force() + self.__get_attractive_force()
 
     def final_goal_reached(self) -> bool:
         return self.__final_goal_reached
 
     def compute_motors_speed(self) -> Tuple[float, float]:
+        distance_to_waipoint = self.__get_distance_to_waypoint()
         distance_to_goal = self.__get_distance_to_goal()
-        if self.__initial_distance_to_goal is None:
-            self.__initial_distance_to_goal = distance_to_goal
-
         total_force = self.__get_total_force()
 
         # stop if too close to the goal
-        if distance_to_goal <= self.__distance_threshold:
+        if distance_to_waipoint <= self.__distance_threshold:
             print(f"{self.__destination} reached.", end=" ")
             try:
-                self.__destination = next(self.__path)
+                self.__destination = self.__get_destination()
                 print(f"Going to {self.__destination}.")
             except PathTraversalCompleted:
                 print("Final goal reached!!")
@@ -113,7 +119,7 @@ class APFController:
                 return 0, 0
 
         raw_speed = self.__map(
-            distance_to_goal,
+            distance_to_waipoint,
             0,
             self.__initial_distance_to_goal,
             0,

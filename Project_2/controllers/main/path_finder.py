@@ -78,6 +78,9 @@ class DeliberativeLayer:
         self.__graph = graph
         self.__path = None
 
+    def get_goal(self) -> Waypoint:
+        return self.__graph.get_goal()
+    
     def generate_path(self) -> Path | None:
         self.__path = iter(DeliberativeLayer.find_path(self.__graph))
     
