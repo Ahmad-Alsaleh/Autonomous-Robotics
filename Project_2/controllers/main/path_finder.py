@@ -40,24 +40,24 @@ class Graph:
         self.__goal = goal
         closest_to_start = (None, float("inf"))
         closest_to_goal = (None, float("inf"))
-        self.__adjacency_graph: Dict[Waypoint, List[Tuple[Waypoint, float]]] = dict()
+        self._adjacency_graph: Dict[Waypoint, List[Tuple[Waypoint, float]]] = dict()
         for waypoint, neighbors in adjacency_graph.items():
             if (dist := _euclidean_distance(waypoint, self.__start)) < closest_to_start[1]:
                 closest_to_start = (waypoint, dist)
             if (dist := _euclidean_distance(waypoint, self.__goal)) < closest_to_goal[1]:
                 closest_to_goal = (waypoint, dist)
-            self.__adjacency_graph[waypoint] = [
+            self._adjacency_graph[waypoint] = [
                 (neighbor, _euclidean_distance(waypoint, neighbor))
                 for neighbor in neighbors
             ]
-        self.__adjacency_graph[start] = [closest_to_start]
-        self.__adjacency_graph[goal] = [closest_to_goal]
-        self.__adjacency_graph[closest_to_start[0]].append((self.__start, closest_to_start[1]))
-        self.__adjacency_graph[closest_to_goal[0]].append((self.__goal, closest_to_goal[1]))
+        self._adjacency_graph[start] = [closest_to_start]
+        self._adjacency_graph[goal] = [closest_to_goal]
+        self._adjacency_graph[closest_to_start[0]].append((self.__start, closest_to_start[1]))
+        self._adjacency_graph[closest_to_goal[0]].append((self.__goal, closest_to_goal[1]))
 
     def get_neighbors(self, waypoint: Waypoint) -> List[Waypoint]:
         """Returns a list of neighbors for a given waypoint."""
-        return self.__adjacency_graph[waypoint]
+        return self._adjacency_graph[waypoint]
 
     def get_heuristic(self, current: Waypoint, goal) -> float:
         """Returns the euclidean distance from the current waypoint to the goal."""
@@ -76,21 +76,21 @@ class DeliberativeLayer:
     
     def __init__(self, graph: Graph) -> None:
         self.__graph = graph
-        self.__path = None
+        self._path = None
 
     def get_goal(self) -> Waypoint:
         return self.__graph.get_goal()
     
     def generate_path(self) -> Path | None:
-        self.__path = iter(DeliberativeLayer.find_path(self.__graph))
+        self._path = iter(DeliberativeLayer.find_path(self.__graph))
     
     def get_next_waypoint(self) -> Waypoint:
-        if self.__path is None:
-            self.__path = iter([])
+        if self._path is None:
+            self._path = iter([])
             return self.__graph.get_goal()
         
         try:
-            return next(self.__path)
+            return next(self._path)
         except StopIteration:
             raise PathTraversalCompleted("The path has been traversed.")
         

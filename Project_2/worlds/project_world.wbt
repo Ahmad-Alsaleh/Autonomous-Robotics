@@ -4,14 +4,14 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/project
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/RectangleArena.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/gctronic/e-puck/protos/E-puck.proto"
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/appearances/protos/MattePaint.proto"
+IMPORTABLE EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/appearances/protos/MattePaint.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/solids/protos/SolidBox.proto"
 
 WorldInfo {
 }
 Viewpoint {
-  orientation -0.5773502691896258 0.5773502691896258 0.5773502691896258 2.0944
-  position 0.7400799478415986 0.5275473239450934 3.736063422429571
+  orientation -0.5697652885121415 0.5704780022777238 0.5915423610561573 2.072146804350761
+  position 0.6972245431547598 0.4251424365853693 4.572151755360122
 }
 TexturedBackground {
 }
@@ -136,7 +136,13 @@ E-puck {
     }
   ]
 }
-Solid {
+Robot {
+  translation -0.09 0 0
+  name "supervisor"
+  controller "supervisor"
+  supervisor TRUE
+}
+DEF NODE_TEMPLATE Solid {
   translation 0.17 0.97 0
   children [
     Shape {
@@ -148,217 +154,7 @@ Solid {
       }
     }
   ]
-  name "p1"
-}
-Solid {
-  translation 0.373 1.045 0
-  children [
-    Shape {
-      appearance MattePaint {
-        baseColor 0.997559 0.312535 0.19791
-      }
-      geometry Sphere {
-        radius 0.05
-      }
-    }
-  ]
-  name "p2"
-}
-Solid {
-  translation 0.17 0.784 0
-  children [
-    Shape {
-      appearance MattePaint {
-        baseColor 0.997559 0.312535 0.19791
-      }
-      geometry Sphere {
-        radius 0.05
-      }
-    }
-  ]
-  name "p3"
-}
-Solid {
-  translation 0.509 0.784 0
-  children [
-    Shape {
-      appearance MattePaint {
-        baseColor 0.997559 0.312535 0.19791
-      }
-      geometry Sphere {
-        radius 0.05
-      }
-    }
-  ]
-  name "p4"
-}
-Solid {
-  translation 0.848 0.971 0
-  children [
-    Shape {
-      appearance MattePaint {
-        baseColor 0.997559 0.312535 0.19791
-      }
-      geometry Sphere {
-        radius 0.05
-      }
-    }
-  ]
-  name "p5"
-}
-Solid {
-  translation 0.848 0.784 0
-  children [
-    Shape {
-      appearance MattePaint {
-        baseColor 0.997559 0.312535 0.19791
-      }
-      geometry Sphere {
-        radius 0.05
-      }
-    }
-  ]
-  name "p6"
-}
-Solid {
-  translation 1.052 0.784 0
-  children [
-    Shape {
-      appearance MattePaint {
-        baseColor 0.997559 0.312535 0.19791
-      }
-      geometry Sphere {
-        radius 0.05
-      }
-    }
-  ]
-  name "p7"
-}
-Solid {
-  translation 0.713 0.411 0
-  children [
-    Shape {
-      appearance MattePaint {
-        baseColor 0.997559 0.312535 0.19791
-      }
-      geometry Sphere {
-        radius 0.05
-      }
-    }
-  ]
-  name "p12"
-}
-Solid {
-  translation 0.697 0.149 0
-  children [
-    Shape {
-      appearance MattePaint {
-        baseColor 0.997559 0.312535 0.19791
-      }
-      geometry Sphere {
-        radius 0.05
-      }
-    }
-  ]
-  name "p10"
-}
-Solid {
-  translation 0.509 0.597 0
-  children [
-    Shape {
-      appearance MattePaint {
-        baseColor 0.997559 0.312535 0.19791
-      }
-      geometry Sphere {
-        radius 0.05
-      }
-    }
-  ]
-  name "p17"
-}
-Solid {
-  translation 1.052 0.485 0
-  children [
-    Shape {
-      appearance MattePaint {
-        baseColor 0.997559 0.312535 0.19791
-      }
-      geometry Sphere {
-        radius 0.05
-      }
-    }
-  ]
-  name "p8"
-}
-Solid {
-  translation 1.018 0.075 0
-  children [
-    Shape {
-      appearance MattePaint {
-        baseColor 0.997559 0.312535 0.19791
-      }
-      geometry Sphere {
-        radius 0.05
-      }
-    }
-  ]
-  name "p9"
-}
-Solid {
-  translation 0.136 0.149 0
-  children [
-    Shape {
-      appearance MattePaint {
-        baseColor 0.997559 0.312535 0.19791
-      }
-      geometry Sphere {
-        radius 0.05
-      }
-    }
-  ]
-  name "p13"
-}
-Solid {
-  translation 0.102 0.336 0
-  children [
-    Shape {
-      appearance MattePaint {
-        baseColor 0.997559 0.312535 0.19791
-      }
-      geometry Sphere {
-        radius 0.05
-      }
-    }
-  ]
-  name "p14"
-}
-Solid {
-  translation 0.102 0.635 0
-  children [
-    Shape {
-      appearance MattePaint {
-        baseColor 0.997559 0.312535 0.19791
-      }
-      geometry Sphere {
-        radius 0.05
-      }
-    }
-  ]
-  name "p15"
-}
-Solid {
-  translation 0.339 0.485 0
-  children [
-    Shape {
-      appearance MattePaint {
-        baseColor 0.997559 0.312535 0.19791
-      }
-      geometry Sphere {
-        radius 0.05
-      }
-    }
-  ]
-  name "p16"
+  name "NODE_TEMPLATE"
 }
 SolidBox {
   translation 0.904974 0.405443 0.04
