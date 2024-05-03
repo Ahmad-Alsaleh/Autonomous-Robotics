@@ -73,6 +73,7 @@ class Supervisor(Supervisor):
             }}]
         }}
         """
+        print(cube_string)
         self.__root_children.importMFNodeFromString(-1, cube_string)
 
     def render_graph(self):
@@ -87,11 +88,9 @@ class Supervisor(Supervisor):
                     n2 = self.__path.index(neighbor)
                     is_path = n2 == n1 + 1
                 except ValueError:
-                    continue
+                    pass
                 self.__insert_edge(node, neighbor, is_path=is_path)
 
-
-# [CODE PLACEHOLDER 1]
 
 
 width = 1.12 / 33
