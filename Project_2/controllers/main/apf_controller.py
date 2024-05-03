@@ -89,11 +89,11 @@ class APFController:
         return self.__final_goal_reached
 
     def compute_motors_speed(self) -> Tuple[float, float]:
-        distance_to_waipoint = self.__get_distance_to_waypoint()
+        distance_to_waypoint = self.__get_distance_to_waypoint()
         total_force = self.__get_total_force()
 
         # stop if too close to the goal
-        if distance_to_waipoint <= self.__distance_threshold:
+        if distance_to_waypoint <= self.__distance_threshold:
             print(f"{self.__destination} reached.", end=" ")
             try:
                 self.__destination = self.__get_destination()
