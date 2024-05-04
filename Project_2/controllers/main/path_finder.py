@@ -25,6 +25,63 @@ def _euclidean_distance(a: Waypoint, b: Waypoint):
     return np.linalg.norm(a.to_numpy() - b.to_numpy())
 
 
+class ObstacleMap:
+    def __init__(self, points: List[List[Waypoint]]):
+        """representation of the obstacles on the map
+
+        Args:
+            points (List[List[Tuple[int, int]]]): a list containing lists of 4 waypoints of
+            the rectangle obstacle (top left, top right, bottom right, bottom left)
+        """
+        self.__obstacles = []
+        for top_left, bottom_right in points:
+            top_right = Waypoint(bottom_right.x, top_left.y)
+            bottom_left = Waypoint(top_left.x, bottom_right.y)
+            # Store the full rectangle
+            self.__obstacles.append([top_left, top_right, bottom_right, bottom_left])
+
+    def __perpendicular_distance(self, x, y, x1, y1, x2, y2):
+        A = x - x1
+        B = y - y1
+        C = x2 - x1
+        D = y2 - y1
+
+        dot = A * C + B * D
+        len_sq = C * C + D * D
+        param = -1
+        if len_sq != 0:  # in case of 0 length line
+            param = dot / len_sq
+
+        if param < 0:
+            xx, yy = x1, y1
+        elif param > 1:
+            xx, yy = x2, y2
+        else:
+            xx = x1 + param * C
+            yy = y1 + param * D
+
+        dx = x - xx
+        dy = y - yy
+        return np.sqrt(dx**2 + dy**2)
+
+    def get_closest_obstacle_distance(self, point: Waypoint) -> float:
+        """Calculates the shortest distance from the point to any edge of the obstacle rectangles."""
+        point_np = point.to_numpy()
+        x, y = point_np
+        min_distance = float("inf")
+        for obstacle in self.__obstacles:
+            # Calculate distance to each edge of the rectangle
+            for i in range(4):
+                start_vertex = obstacle[i]
+                end_vertex = obstacle[(i + 1) % 4]
+                dist = self.__perpendicular_distance(
+                    x, y, start_vertex.x, start_vertex.y, end_vertex.x, end_vertex.y
+                )
+                if dist < min_distance:
+                    min_distance = dist
+        return min_distance if min_distance != float("inf") else 1e-6
+
+
 class Graph:
     """
     - Defines a graph of waypoints.
@@ -37,12 +94,14 @@ class Graph:
         adjacency_graph: Dict[Waypoint, List[Waypoint]],
         start: Waypoint,
         goal: Waypoint,
+        obstacle_map: ObstacleMap,
     ) -> None:
         # appending the cost to each each neighbor to the neighbor
         # i.e.: {waypoint_1: [neighbor_1, neighbor_2]} becomes
         # {waypoint_1: [(neighbor_1, cost_1), (neighbor_2, cost_2)]}
         self.__start = start
         self.__goal = goal
+        self.__obstacle_map = obstacle_map
         closest_to_start = (None, float("inf"))
         closest_to_goal = (None, float("inf"))
         self._adjacency_graph: Dict[Waypoint, List[Tuple[Waypoint, float]]] = dict()
@@ -67,6 +126,20 @@ class Graph:
         self._adjacency_graph[closest_to_goal[0]].append(
             (self.__goal, closest_to_goal[1])
         )
+        self.__add_obstacle_cost()
+
+    def __add_obstacle_cost(self):
+        """adds (closest) obstacle distance to the cost of each edge."""
+        weight_obstacle = 0.5
+        for waypoint, edges in self._adjacency_graph.items():
+            updated_edges = []
+            for neighbor, direct_cost in edges:
+                obstacle_distance = self.__obstacle_map.get_closest_obstacle_distance(
+                    waypoint
+                )
+                total_cost = direct_cost + weight_obstacle * obstacle_distance
+                updated_edges.append((neighbor, total_cost))
+            self._adjacency_graph[waypoint] = updated_edges
 
     def get_neighbors(self, waypoint: Waypoint) -> List[Waypoint]:
         """Returns a list of neighbors for a given waypoint."""

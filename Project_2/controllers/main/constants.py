@@ -2,7 +2,7 @@ import os, sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from main.path_finder import Waypoint, Graph
+from main.path_finder import Waypoint, Graph, ObstacleMap
 
 TEST_ID = 4
 width = 1.12 / 33
@@ -62,4 +62,57 @@ graph = {
     p16: [p17],
     p17: [p4, p12, p16],
 }
-graph = Graph(graph, start=start, goal=goal)
+
+obstacle_map = ObstacleMap(
+    [
+        # stores the top left, top right, bottom right, bottom left corners of the obstacle
+        [
+            Waypoint(0.49, 1.12),
+            Waypoint(0.56, 0.92),
+        ],
+        [
+            Waypoint(0.27, 0.92),
+            Waypoint(0.56, 0.85),
+        ],
+        [
+            Waypoint(0.208, 0.706),
+            Waypoint(0.438, 0.636),
+        ],
+        [
+            Waypoint(0.208, 0.636),
+            Waypoint(0.268, 0.356),
+        ],
+        [
+            Waypoint(0.198, 0.356),
+            Waypoint(0.538, 0.296),
+        ],
+        [
+            Waypoint(0.619, 0.698),
+            Waypoint(1.01, 0.636),
+        ],
+        [
+            Waypoint(0.87, 0.636),
+            Waypoint(0.936, 0.172),
+        ],
+        # add map walls
+        [
+            Waypoint(-0.005, 1.12),
+            Waypoint(0, 0),
+        ],
+        [
+            Waypoint(-0.005, 1.13),
+            Waypoint(1.12, 1.12),
+        ],
+        [
+            Waypoint(1.12, 1.12),
+            Waypoint(1.13, -0.0142),
+        ],
+        [
+            Waypoint(-0.0149, -0.005),
+            Waypoint(1.13, -0.014),
+        ],
+    ]
+)
+
+
+graph = Graph(graph, start=start, goal=goal, obstacle_map=obstacle_map)
