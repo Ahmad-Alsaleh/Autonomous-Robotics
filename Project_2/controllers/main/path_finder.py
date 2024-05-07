@@ -129,15 +129,16 @@ class Graph:
         self.__add_obstacle_cost()
 
     def __add_obstacle_cost(self):
-        """adds (closest) obstacle distance to the cost of each edge."""
-        weight_obstacle = 0.5
+        """adds (closest) obstacle distance to the cost of each edge
+           and disregards the direct cost.
+        """
         for waypoint, edges in self._adjacency_graph.items():
             updated_edges = []
             for neighbor, direct_cost in edges:
                 obstacle_distance = self.__obstacle_map.get_closest_obstacle_distance(
                     waypoint
                 )
-                total_cost = direct_cost + weight_obstacle * obstacle_distance
+                total_cost = 1. / obstacle_distance
                 updated_edges.append((neighbor, total_cost))
             self._adjacency_graph[waypoint] = updated_edges
 
