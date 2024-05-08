@@ -2,7 +2,7 @@ import os, sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from main.path_finder import Waypoint, Graph, ObstacleMap
+from main.path_finder import Waypoint, Graph, ObstacleMap, _euclidean_distance
 
 TEST_ID = 4
 width = 1.12 / 33
@@ -115,4 +115,4 @@ obstacle_map = ObstacleMap(
 )
 
 
-graph = Graph(graph, start=start, goal=goal, obstacle_map=obstacle_map)
+graph = Graph(graph, start=start, goal=goal, obstacle_map=obstacle_map, cost_function=obstacle_map.get_closest_obstacle_cost, heuristic_function=_euclidean_distance)

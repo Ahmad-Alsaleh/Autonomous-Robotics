@@ -2,13 +2,12 @@ from controller import Supervisor
 import os, sys, re
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from main import path_finder
-from main.constants import graph
+from main.main import Graph, Waypoint, DeliberativeLayer, graph
 
 
 class Supervisor(Supervisor):
     def __init__(
-        self, graph: path_finder.Graph, path: list[path_finder.Waypoint]
+        self, graph: Graph, path: list[Waypoint]
     ) -> None:
         super().__init__()
         self.__time_step = int(self.getBasicTimeStep())
@@ -22,7 +21,7 @@ class Supervisor(Supervisor):
         """Runs a single step in the simulator."""
         return self.step(self.__time_step)
 
-    def __insert_node(self, node: path_finder.Waypoint):
+    def __insert_node(self, node: Waypoint):
         template_string = (
             self.__node_template.getDef() + " " + self.__node_template.exportString()
         )
@@ -94,7 +93,7 @@ class Supervisor(Supervisor):
                 self.__insert_edge(node, neighbor, is_path=is_path)
 
 
-dl = path_finder.DeliberativeLayer(graph)
+dl = DeliberativeLayer(graph)
 dl.generate_path()
 path = list(dl._path)
 supervisor = Supervisor(graph, path)
