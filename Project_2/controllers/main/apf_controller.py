@@ -1,6 +1,6 @@
-from typing import Iterator, Tuple
-from robot import Robot
-from path_finder import Waypoint, Path, DeliberativeLayer, PathTraversalCompleted, _euclidean_distance
+from typing import Tuple
+from main.robot import Robot
+from main.path_finder import Waypoint, DeliberativeLayer, PathTraversalCompleted
 import numpy as np
 
 class APFController:
@@ -19,8 +19,6 @@ class APFController:
         self.__robot.simulator_step() # essential to enable gps in order to obtain intial distance to goal
         
         self.__destination = self.__get_destination()
-        
-        
 
     def __get_destination(self) -> Waypoint:
         
@@ -102,8 +100,6 @@ class APFController:
                 print("Final goal reached!!")
                 self.__final_goal_reached = True
                 return 0, 0
-
-        
 
         target_goal = np.arctan2(total_force[1], total_force[0])
         angle_difference = target_goal - self.__robot.get_current_angle()

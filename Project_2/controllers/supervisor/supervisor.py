@@ -2,7 +2,8 @@ from controller import Supervisor
 import os, sys, re
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from main.main import Graph, Waypoint, DeliberativeLayer, graph
+from main.path_finder import Graph, Waypoint, DeliberativeLayer
+from main.main import graph
 
 
 class Supervisor(Supervisor):

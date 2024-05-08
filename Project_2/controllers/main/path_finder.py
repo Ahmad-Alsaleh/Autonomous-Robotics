@@ -21,10 +21,6 @@ class Path(list):
         return " --> ".join(map(str, self))
 
 
-def _euclidean_distance(a: Waypoint, b: Waypoint):
-    return np.linalg.norm(a.to_numpy() - b.to_numpy())
-
-
 class ObstacleMap:
     def __init__(self, points: List[List[Waypoint]]):
         """representation of the obstacles on the map
@@ -64,7 +60,7 @@ class ObstacleMap:
         dy = y - yy
         return np.sqrt(dx**2 + dy**2)
 
-    def get_closest_obstacle_cost(self, point: Waypoint, *args) -> float:
+    def get_closest_obstacle_distance(self, point: Waypoint, *args) -> float:
         """Calculates the shortest distance from the point to any edge of the obstacle rectangles."""
         point_np = point.to_numpy()
         x, y = point_np
@@ -94,7 +90,6 @@ class Graph:
         adjacency_graph: Dict[Waypoint, List[Waypoint]],
         start: Waypoint,
         goal: Waypoint,
-        obstacle_map: ObstacleMap,
         cost_function: Callable,
         heuristic_function: Callable
     ) -> None:
@@ -103,34 +98,36 @@ class Graph:
         # {waypoint_1: [(neighbor_1, cost_1), (neighbor_2, cost_2)]}
         self.__start = start
         self.__goal = goal
-        self.__obstacle_map = obstacle_map
         self.__heuristic_function = heuristic_function
         closest_to_start = (None, float("inf"))
         closest_to_goal = (None, float("inf"))
         self._adjacency_graph: Dict[Waypoint, List[Tuple[Waypoint, float]]] = dict()
-        
         for waypoint, neighbors in adjacency_graph.items():
-            if (dist := _euclidean_distance(waypoint, self.__start)) < closest_to_start[
+            if (dist := Graph.euclidean_distance(waypoint, self.__start)) < closest_to_start[
                 1
             ]:
                 closest_to_start = (waypoint, dist)
-            if (dist := _euclidean_distance(waypoint, self.__goal)) < closest_to_goal[
+            if (dist := Graph.euclidean_distance(waypoint, self.__goal)) < closest_to_goal[
                 1
             ]:
                 closest_to_goal = (waypoint, dist)
+
             self._adjacency_graph[waypoint] = [
-                (neighbor, cost_function(waypoint, neighbor))
+                (neighbor, cost_function(neighbor, waypoint))
                 for neighbor in neighbors
             ]
-        self._adjacency_graph[start] = [closest_to_start]
-        self._adjacency_graph[goal] = [closest_to_goal]
-        self._adjacency_graph[closest_to_start[0]].append(
-            (self.__start, closest_to_start[1])
+
+        closest_to_start = closest_to_start[0]
+        closest_to_goal = closest_to_goal[0]
+
+        self._adjacency_graph[self.__start] = [(closest_to_start, cost_function(closest_to_start, self.__start))]
+        self._adjacency_graph[self.__goal] = [(closest_to_goal, cost_function(closest_to_goal, self.__goal))]
+        self._adjacency_graph[closest_to_start].append(
+            (self.__start, cost_function(self.__start, closest_to_start))
         )
-        self._adjacency_graph[closest_to_goal[0]].append(
-            (self.__goal, closest_to_goal[1])
+        self._adjacency_graph[closest_to_goal].append(
+            (self.__goal, cost_function(self.__goal, closest_to_goal))
         )
-        # self.__add_cost(self.__obstacle_map.get_closest_obstacle_cost)
 
     def __add_cost(self, cost_function: Callable):
         """adds (closest) obstacle distance to the cost of each edge
@@ -139,7 +136,7 @@ class Graph:
         for waypoint, edges in self._adjacency_graph.items():
             updated_edges = []
             for neighbor, direct_cost in edges:
-                cost = cost_function(waypoint, neighbor)
+                cost = cost_function(neighbor, waypoint)
                 updated_edges.append((neighbor, cost))
             self._adjacency_graph[waypoint] = updated_edges
 
@@ -150,7 +147,6 @@ class Graph:
     def get_heuristic(self, current: Waypoint, goal) -> float:
         """Returns the euclidean distance from the current waypoint to the goal."""
         return self.__heuristic_function(current, goal)
-    
 
     def get_start(self) -> Waypoint:
         return self.__start
@@ -158,6 +154,12 @@ class Graph:
     def get_goal(self) -> Waypoint:
         return self.__goal
 
+    @staticmethod
+    def euclidean_distance(a: Waypoint, b: Waypoint):
+        return np.linalg.norm(a.to_numpy() - b.to_numpy())
+    
+    def no_heauristic(*args) -> float:
+        return 0
 
 class PathTraversalCompleted(Exception):
     pass
