@@ -1,6 +1,6 @@
 from typing import Tuple
 from main.robot import Robot
-from main.path_finder import Waypoint, DeliberativeLayer, PathTraversalCompleted
+from main.deliberative_layer import Waypoint, DeliberativeLayer, PathTraversalCompleted
 import numpy as np
 
 

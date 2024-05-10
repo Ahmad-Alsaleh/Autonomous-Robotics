@@ -1,7 +1,7 @@
 import os, sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from main.path_finder import Graph, DeliberativeLayer
+from main.deliberative_layer import Graph, DeliberativeLayer
 from main.apf_controller import APFController
 from main.robot import Robot
 from main import constants

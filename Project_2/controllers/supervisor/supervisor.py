@@ -3,7 +3,7 @@ from typing import List
 import os, sys, re
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from main.path_finder import Graph, Waypoint, DeliberativeLayer
+from main.deliberative_layer import Graph, Waypoint, DeliberativeLayer
 from main.main import graph
 
 
