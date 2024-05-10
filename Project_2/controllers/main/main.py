@@ -6,8 +6,11 @@ from main.apf_controller import APFController
 from main.robot import Robot
 from main import constants
 
-PATH_TYPE = "shortest"
-TEST_ID = "test1"
+# choose from ["safest", "shortest"]
+PATH_TYPE = "safest"
+
+# choose from ["test1", "test2", "test3", "test4"]
+TEST_ID = "test4"
 
 waypoints = constants.get_waypoints()
 start, goal = constants.get_start_and_goal(TEST_ID)

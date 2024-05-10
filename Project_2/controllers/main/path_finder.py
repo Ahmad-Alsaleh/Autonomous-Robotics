@@ -4,43 +4,59 @@ import numpy as np
 
 
 @dataclass(frozen=True)
-class Waypoint:
-    x: int
-    y: int
-    name: int | None = None
+class Point:
+    x: float
+    y: float
+    name: str | None = None
 
     def __repr__(self) -> str:
-        return f"{self.name if self.name is not None else 'WAY_POINT'}({self.x:.3f}, {self.y:.3f})"
+        name = self.name if self.name is not None else "POINT"
+        return f"{name}({self.x:.3f}, {self.y:.3f})"
 
     def to_numpy(self) -> np.ndarray:
         return np.array([self.x, self.y])
 
 
-class Path(list):
-    def __repr__(self) -> str:
-        return " --> ".join(map(str, self))
+@dataclass
+class Rectangle:
+    top_left: Point
+    bottom_right: Point
 
 
-class ObstacleMap:
-    def __init__(self, points: List[List[Waypoint]]):
-        """representation of the obstacles on the map
+@dataclass
+class Line:
+    start: Point
+    end: Point
+
+
+# type aliases
+Waypoint = Point
+Neighbors = List[Waypoint]
+NeighborsWithCosts = List[Tuple[Waypoint, float]]
+Path = List[Waypoint]
+
+
+class ObstaclesMap:
+    def __init__(self, rectangular_obstacles: List[Rectangle]):
+        """Representation of the rectangular obstacles on the map
 
         Args:
-            points (List[List[Tuple[int, int]]]): a list containing lists of 4 waypoints of
-            the rectangle obstacle (top left, top right, bottom right, bottom left)
+            obstacles (List[Rectangle]): a list of rectangular obstacles.
         """
         self.__obstacles = []
-        for top_left, bottom_right in points:
-            top_right = Waypoint(bottom_right.x, top_left.y)
-            bottom_left = Waypoint(top_left.x, bottom_right.y)
-            # Store the full rectangle
+        # storing the four points of the rectangle
+        for rectangle in rectangular_obstacles:
+            top_left = rectangle.top_left
+            bottom_right = rectangle.bottom_right
+            top_right = Point(bottom_right.x, top_left.y)
+            bottom_left = Point(top_left.x, bottom_right.y)
             self.__obstacles.append([top_left, top_right, bottom_right, bottom_left])
 
-    def __perpendicular_distance(self, x, y, x1, y1, x2, y2):
-        A = x - x1
-        B = y - y1
-        C = x2 - x1
-        D = y2 - y1
+    def __get_perpendicular_distance(self, point: Point, line: Line) -> float:
+        A = point.x - line.start.x
+        B = point.y - line.start.y
+        C = line.end.x - line.start.x
+        D = line.end.y - line.start.y
 
         dot = A * C + B * D
         len_sq = C * C + D * D
@@ -49,92 +65,86 @@ class ObstacleMap:
             param = dot / len_sq
 
         if param < 0:
-            xx, yy = x1, y1
+            xx, yy = line.start.x, line.start.y
         elif param > 1:
-            xx, yy = x2, y2
+            xx, yy = line.end.x, line.end.y
         else:
-            xx = x1 + param * C
-            yy = y1 + param * D
+            xx = line.start.x + param * C
+            yy = line.start.y + param * D
 
-        dx = x - xx
-        dy = y - yy
+        dx = point.x - xx
+        dy = point.y - yy
         return np.sqrt(dx**2 + dy**2)
 
     def get_closest_obstacle_distance(self, point: Waypoint, _) -> float:
         """Calculates the shortest distance from the point to any edge of the obstacle rectangles."""
-        point_np = point.to_numpy()
-        x, y = point_np
         min_distance = float("inf")
         for obstacle in self.__obstacles:
             # Calculate distance to each edge of the rectangle
             for i in range(4):
                 start_vertex = obstacle[i]
                 end_vertex = obstacle[(i + 1) % 4]
-                dist = self.__perpendicular_distance(
-                    x, y, start_vertex.x, start_vertex.y, end_vertex.x, end_vertex.y
-                )
+                line = Line(start_vertex, end_vertex)
+                dist = self.__get_perpendicular_distance(point, line)
                 if dist < min_distance:
                     min_distance = dist
         return 1.0 / min_distance if min_distance != float("inf") else 1e-6
 
 
 class Graph:
-    """
-    - Defines a graph of waypoints.
-    - Uses euclidean distance as the heuristic.
-    - Uses the distance traveled as the cost.
-    """
-
     def __init__(
         self,
-        adjacency_graph: Dict[Waypoint, List[Waypoint]],
+        adjacency_graph: Dict[Waypoint, Neighbors],
         start: Waypoint,
         goal: Waypoint,
         cost_function: Callable,
         heuristic_function: Callable,
     ) -> None:
-        # appending the cost to each each neighbor to the neighbor
-        # i.e.: {waypoint_1: [neighbor_1, neighbor_2]} becomes
-        # {waypoint_1: [(neighbor_1, cost_1), (neighbor_2, cost_2)]}
         self.__start = start
         self.__goal = goal
         self.__heuristic_function = heuristic_function
+
         closest_to_start = (None, float("inf"))
         closest_to_goal = (None, float("inf"))
-        self._adjacency_graph: Dict[Waypoint, List[Tuple[Waypoint, float]]] = dict()
+        self.__adjacency_graph: Dict[Waypoint, NeighborsWithCosts] = dict()
         for waypoint, neighbors in adjacency_graph.items():
-            if (
-                dist := Graph.euclidean_distance(waypoint, self.__start)
-            ) < closest_to_start[1]:
-                closest_to_start = (waypoint, dist)
-            if (
-                dist := Graph.euclidean_distance(waypoint, self.__goal)
-            ) < closest_to_goal[1]:
-                closest_to_goal = (waypoint, dist)
+            distance = Graph.euclidean_distance(waypoint, self.__start)
+            if distance < closest_to_start[1]:
+                closest_to_start = (waypoint, distance)
 
-            self._adjacency_graph[waypoint] = [
+            distance = Graph.euclidean_distance(waypoint, self.__goal)
+            if distance < closest_to_goal[1]:
+                closest_to_goal = (waypoint, distance)
+
+            # appending the cost to each each neighbor
+            # i.e.: {waypoint_1: [neighbor_1, neighbor_2, ...], ...} becomes
+            # {waypoint_1: [(neighbor_1, cost_1), (neighbor_2, cost_2), ...], ...}
+            self.__adjacency_graph[waypoint] = [
                 (neighbor, cost_function(neighbor, waypoint)) for neighbor in neighbors
             ]
 
+        # connecting the start and goal to the rest of the graph
         closest_to_start = closest_to_start[0]
         closest_to_goal = closest_to_goal[0]
-
-        self._adjacency_graph[self.__start] = [
+        self.__adjacency_graph[self.__start] = [
             (closest_to_start, cost_function(closest_to_start, self.__start))
         ]
-        self._adjacency_graph[self.__goal] = [
+        self.__adjacency_graph[self.__goal] = [
             (closest_to_goal, cost_function(closest_to_goal, self.__goal))
         ]
-        self._adjacency_graph[closest_to_start].append(
+        self.__adjacency_graph[closest_to_start].append(
             (self.__start, cost_function(self.__start, closest_to_start))
         )
-        self._adjacency_graph[closest_to_goal].append(
+        self.__adjacency_graph[closest_to_goal].append(
             (self.__goal, cost_function(self.__goal, closest_to_goal))
         )
 
-    def get_neighbors(self, waypoint: Waypoint) -> List[Waypoint]:
+    def get_neighbors(self, waypoint: Waypoint) -> Neighbors:
         """Returns a list of neighbors for a given waypoint."""
-        return self._adjacency_graph[waypoint]
+        return self.__adjacency_graph[waypoint]
+
+    def get_adjacency_graph(self):
+        return self.__adjacency_graph
 
     def get_heuristic(self, current: Waypoint, goal) -> float:
         """Calculates the heuristic value between the current waypoint and the goal."""
@@ -204,7 +214,7 @@ class DeliberativeLayer:
                     n = parents[n]
                 reconstruction_path.append(start)
                 reconstruction_path.reverse()
-                return Path(reconstruction_path)
+                return reconstruction_path
             for m, weight in graph.get_neighbors(n):
                 if m not in open_list and m not in closed_list:
                     open_list.add(m)

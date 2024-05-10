@@ -78,11 +78,9 @@ class Supervisor(Supervisor):
         self.__root_children.importMFNodeFromString(-1, cube_string)
 
     def render_graph(self):
-        for node, neighbors in self.__graph._adjacency_graph.items():
-            neighbors = [neighbor[0] for neighbor in neighbors]
-
+        for node, neighbors in self.__graph.get_adjacency_graph().items():
             self.__insert_node(node)
-            for neighbor in neighbors:
+            for neighbor, _ in neighbors:
                 is_path = False
                 try:
                     n1 = self.__path.index(node)
@@ -93,9 +91,9 @@ class Supervisor(Supervisor):
                 self.__insert_edge(node, neighbor, is_path=is_path)
 
 
-dl = DeliberativeLayer(graph)
-dl.generate_path()
-path = list(dl._path)
+deliberative_layer = DeliberativeLayer(graph)
+deliberative_layer.generate_path()
+path = list(deliberative_layer._path)
 supervisor = Supervisor(graph, path)
 supervisor.render_graph()
 

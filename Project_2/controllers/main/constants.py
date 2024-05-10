@@ -2,27 +2,27 @@ import os, sys
 from typing import Callable, Literal, Tuple
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from main.path_finder import Waypoint, Graph, ObstacleMap
+from main.path_finder import Waypoint, Graph, ObstaclesMap, Rectangle
 
 
 def get_cost_and_heuristic_functions(
     path_type: Literal["shortest", "safest"]
 ) -> Tuple[Callable, Callable]:
-    obstacle_map = ObstacleMap(
+    obstacle_map = ObstaclesMap(
         [
             # stores the top left, top right, bottom right, bottom left corners of the obstacle
-            [Waypoint(0.49, 1.12), Waypoint(0.56, 0.92)],
-            [Waypoint(0.27, 0.92), Waypoint(0.56, 0.85)],
-            [Waypoint(0.208, 0.706), Waypoint(0.438, 0.636)],
-            [Waypoint(0.208, 0.636), Waypoint(0.268, 0.356)],
-            [Waypoint(0.198, 0.356), Waypoint(0.538, 0.296)],
-            [Waypoint(0.619, 0.698), Waypoint(1.01, 0.636)],
-            [Waypoint(0.87, 0.636), Waypoint(0.936, 0.172)],
+            Rectangle(Waypoint(0.49, 1.12), Waypoint(0.56, 0.92)),
+            Rectangle(Waypoint(0.27, 0.92), Waypoint(0.56, 0.85)),
+            Rectangle(Waypoint(0.208, 0.706), Waypoint(0.438, 0.636)),
+            Rectangle(Waypoint(0.208, 0.636), Waypoint(0.268, 0.356)),
+            Rectangle(Waypoint(0.198, 0.356), Waypoint(0.538, 0.296)),
+            Rectangle(Waypoint(0.619, 0.698), Waypoint(1.01, 0.636)),
+            Rectangle(Waypoint(0.87, 0.636), Waypoint(0.936, 0.172)),
             # add map walls
-            [Waypoint(-0.005, 1.12), Waypoint(0, 0)],
-            [Waypoint(-0.005, 1.13), Waypoint(1.12, 1.12)],
-            [Waypoint(1.12, 1.12), Waypoint(1.13, -0.0142)],
-            [Waypoint(-0.0149, -0.005), Waypoint(1.13, -0.014)],
+            Rectangle(Waypoint(-0.005, 1.12), Waypoint(0, 0)),
+            Rectangle(Waypoint(-0.005, 1.13), Waypoint(1.12, 1.12)),
+            Rectangle(Waypoint(1.12, 1.12), Waypoint(1.13, -0.0142)),
+            Rectangle(Waypoint(-0.0149, -0.005), Waypoint(1.13, -0.014)),
         ]
     )
 
@@ -38,7 +38,9 @@ def get_cost_and_heuristic_functions(
     return cost_function, heuristic_function
 
 
-def get_start_and_goal(test_id: Literal["test1", "test2", "test3", "test4"]) -> Tuple[Waypoint, Waypoint]:
+def get_start_and_goal(
+    test_id: Literal["test1", "test2", "test3", "test4"]
+) -> Tuple[Waypoint, Waypoint]:
     tests = {
         "test1": {
             "start": (0.07, 1.05),
@@ -61,7 +63,9 @@ def get_start_and_goal(test_id: Literal["test1", "test2", "test3", "test4"]) -> 
     try:
         test_case = tests[test_id]
     except KeyError:
-        raise ValueError(f"Invalid test id: {test_id}. Choose from {', '.join(tests.keys())}.")
+        raise ValueError(
+            f"Invalid test id: {test_id}. Choose from {', '.join(tests.keys())}."
+        )
     start = Waypoint(*test_case["start"], "start")
     goal = Waypoint(*test_case["goal"], "goal")
 
