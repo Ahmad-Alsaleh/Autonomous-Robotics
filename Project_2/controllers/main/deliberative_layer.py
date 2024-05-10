@@ -168,66 +168,62 @@ class PathTraversalCompleted(Exception):
     pass
 
 
+class PathDoesNotExist(Exception):
+    pass
+
+
 class DeliberativeLayer:
     def __init__(self, graph: Graph) -> None:
         self.__graph = graph
-        self._path = None
+        self.__path = iter(a_star(self.__graph))
 
-    def get_goal(self) -> Waypoint:
-        return self.__graph.get_goal()
-
-    def generate_path(self) -> Path | None:
-        self._path = iter(DeliberativeLayer.find_path(self.__graph))
+    def get_path(self) -> Path:
+        return list(self.__path)
 
     def get_next_waypoint(self) -> Waypoint:
-        if self._path is None:
-            self._path = iter([])
-            return self.__graph.get_goal()
         try:
-            return next(self._path)
+            return next(self.__path)
         except StopIteration:
             raise PathTraversalCompleted("The path has been traversed.")
 
-    @staticmethod
-    def find_path(graph: Graph) -> Path | None:
-        """Returns the path found by A-Star."""
-        start = graph.get_start()
-        goal = graph.get_goal()
-        open_list = set([start])
-        closed_list = set([])
-        g = {start: 0}
-        parents = {start: start}
-        while len(open_list) > 0:
-            n = None
-            for v in open_list:
-                if n == None or g[v] + graph.get_heuristic(v, goal) < g[
-                    n
-                ] + graph.get_heuristic(n, goal):
-                    n = v
-            if n == None:
-                print("==========Path does not exist!!==========")
-                return None
-            if n == goal:
-                reconstruction_path = []
-                while parents[n] != n:
-                    reconstruction_path.append(n)
-                    n = parents[n]
-                reconstruction_path.append(start)
-                reconstruction_path.reverse()
-                return reconstruction_path
-            for m, weight in graph.get_neighbors(n):
-                if m not in open_list and m not in closed_list:
-                    open_list.add(m)
-                    parents[m] = n
+
+def a_star(graph: Graph) -> Path:
+    """Returns the path found by A-Star."""
+    start = graph.get_start()
+    goal = graph.get_goal()
+    open_list = set([start])
+    closed_list = set([])
+    g = {start: 0}
+    parents = {start: start}
+    while len(open_list) > 0:
+        n = None
+        for v in open_list:
+            if n == None or g[v] + graph.get_heuristic(v, goal) < g[
+                n
+            ] + graph.get_heuristic(n, goal):
+                n = v
+        if n == None:
+            raise PathDoesNotExist
+        if n == goal:
+            reconstruction_path = []
+            while parents[n] != n:
+                reconstruction_path.append(n)
+                n = parents[n]
+            reconstruction_path.append(start)
+            reconstruction_path.reverse()
+            return reconstruction_path
+        for m, weight in graph.get_neighbors(n):
+            if m not in open_list and m not in closed_list:
+                open_list.add(m)
+                parents[m] = n
+                g[m] = g[n] + weight
+            else:
+                if g[m] > g[n] + weight:
                     g[m] = g[n] + weight
-                else:
-                    if g[m] > g[n] + weight:
-                        g[m] = g[n] + weight
-                        parents[m] = n
-                        if m in closed_list:
-                            closed_list.remove(m)
-                            open_list.add(m)
-            open_list.remove(n)
-            closed_list.add(n)
-        print("==========Path does not exist!!==========")
-        return None
+                    parents[m] = n
+                    if m in closed_list:
+                        closed_list.remove(m)
+                        open_list.add(m)
+        open_list.remove(n)
+        closed_list.add(n)
+    raise PathDoesNotExist

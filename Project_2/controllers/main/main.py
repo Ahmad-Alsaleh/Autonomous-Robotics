@@ -29,7 +29,6 @@ graph = Graph(
 if __name__ == "__main__":
     robot = Robot()
     deliberative_layer = DeliberativeLayer(graph)
-    deliberative_layer.generate_path()
     speed_controller = APFController(
         robot, deliberative_layer, distance_to_goal_threshold=0.05
     )
