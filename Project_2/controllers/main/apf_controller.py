@@ -3,6 +3,7 @@ from main.robot import Robot
 from main.path_finder import Waypoint, DeliberativeLayer, PathTraversalCompleted
 import numpy as np
 
+
 class APFController:
     def __init__(
         self,
@@ -15,20 +16,17 @@ class APFController:
         self.__distance_threshold = distance_to_goal_threshold
         self.__final_goal_reached: bool = False
         self.__deliberative_layer = deliberative_layer
-        
-        self.__robot.simulator_step() # essential to enable gps in order to obtain intial distance to goal
-        
+        self.__robot.simulator_step()  # essential to enable gps in order to obtain initial distance to goal
         self.__destination = self.__get_destination()
 
     def __get_destination(self) -> Waypoint:
-        
-        return self.__deliberative_layer.get_next_waypoint()    
+        return self.__deliberative_layer.get_next_waypoint()
 
     def __get_heading_vector(self) -> np.ndarray:
         """Calculates the heading vector from the current position to the goal position."""
         return self.__destination.to_numpy() - self.__robot.get_current_position()
 
-    def __get_attractive_force(self, max_magnitude= 5) -> np.ndarray:
+    def __get_attractive_force(self, max_magnitude=5) -> np.ndarray:
         heading = self.__get_heading_vector()
         return (max_magnitude / np.linalg.norm(heading)) * (heading)
 
@@ -37,7 +35,7 @@ class APFController:
 
     def __filter_angle(self, angle: float) -> float:
         """Returns the proportional control output for a given target and current value."""
-    
+
         front_distance = self.__robot.get_front_distance()
 
         filter_amount = (
@@ -104,11 +102,13 @@ class APFController:
         target_goal = np.arctan2(total_force[1], total_force[0])
         angle_difference = target_goal - self.__robot.get_current_angle()
         # changing the range of the angle to the range [-pi, pi]
-        angle_difference = np.arctan2(np.sin(angle_difference), np.cos(angle_difference))
+        angle_difference = np.arctan2(
+            np.sin(angle_difference), np.cos(angle_difference)
+        )
 
         raw_speed = self.__map(
             abs(angle_difference),
-            np.pi/2,
+            np.pi / 2,
             0,
             0,
             self.__robot.MAX_SPEED,

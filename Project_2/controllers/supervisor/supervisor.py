@@ -7,9 +7,7 @@ from main.main import graph
 
 
 class Supervisor(Supervisor):
-    def __init__(
-        self, graph: Graph, path: list[Waypoint]
-    ) -> None:
+    def __init__(self, graph: Graph, path: list[Waypoint]) -> None:
         super().__init__()
         self.__time_step = int(self.getBasicTimeStep())
         self.__root_children = self.getRoot().getField("children")
