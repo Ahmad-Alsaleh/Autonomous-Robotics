@@ -1,5 +1,5 @@
-import numpy as np
 from controller import Robot
+import numpy as np
 
 
 class Robot(Robot):
