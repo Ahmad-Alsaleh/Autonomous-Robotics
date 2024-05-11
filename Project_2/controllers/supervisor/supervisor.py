@@ -41,9 +41,9 @@ class Supervisor(Supervisor):
             waypoint_string = re.sub(
                 r"baseColor .*", "baseColor 0 1 0", waypoint_string
             )
-        elif waypoint.name == "start":  # color it yellow
+        elif waypoint.name == "start":  # color it red
             waypoint_string = re.sub(
-                r"baseColor .*", "baseColor 1 1 0", waypoint_string
+                r"baseColor .*", "baseColor 1 0 0", waypoint_string
             )
 
         # import the modified waypoint string

@@ -25,6 +25,10 @@ graph = Graph(
 )
 
 if __name__ == "__main__":
+    print("Starting simulation...")
+    print(f"Path type: {PATH_TYPE}")
+    print(f"Test ID: {TEST_ID}")
+
     robot = Robot()
     deliberative_layer = DeliberativeLayer(graph)
     speed_controller = APFController(robot, deliberative_layer)
