@@ -14,24 +14,20 @@ TEST_ID = "test4"
 
 waypoints = constants.get_waypoints()
 start, goal = constants.get_start_and_goal(TEST_ID)
-cost_function, heuristic_function = constants.get_cost_and_heuristic_functions(
-    PATH_TYPE
-)
+cost_func, heuristic_func = constants.get_cost_and_heuristic_functions(PATH_TYPE)
 
 graph = Graph(
     adjacency_graph=waypoints,
     start=start,
     goal=goal,
-    cost_function=cost_function,
-    heuristic_function=heuristic_function,
+    cost_function=cost_func,
+    heuristic_function=heuristic_func,
 )
 
 if __name__ == "__main__":
     robot = Robot()
     deliberative_layer = DeliberativeLayer(graph)
-    speed_controller = APFController(
-        robot, deliberative_layer, distance_to_goal_threshold=0.05
-    )
+    speed_controller = APFController(robot, deliberative_layer)
 
     while robot.simulator_step() != -1:
         left_speed, right_speed = speed_controller.compute_motors_speed()

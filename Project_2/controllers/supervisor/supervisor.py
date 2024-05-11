@@ -1,61 +1,66 @@
 from controller import Supervisor
 import os, sys, re
+from math import atan2, sqrt
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from main.deliberative_layer import Graph, Waypoint, DeliberativeLayer, Path
+from main.deliberative_layer import Graph, Waypoint, DeliberativeLayer, Path, a_star
 from main.main import graph
 
 
 class Supervisor(Supervisor):
     def __init__(self, graph: Graph, path: Path) -> None:
         super().__init__()
-        self.__time_step = int(self.getBasicTimeStep())
-        self.__root_children = self.getRoot().getField("children")
-        self._epuck = self.getFromDef("EPUCK")
-        self.__node_template = self.getFromDef("NODE_TEMPLATE")
         self.__graph = graph
         self.__path = path
+        self.__root_children = self.getRoot().getField("children")
+        self.__epuck = self.getFromDef("EPUCK")
+        self.__waypoint_template = self.getFromDef("WAYPOINT_TEMPLATE")
 
-    def simulator_step(self) -> int:
-        """Runs a single step in the simulator."""
-        return self.step(self.__time_step)
-
-    def __insert_node(self, node: Waypoint):
-        template_string = (
-            self.__node_template.getDef() + " " + self.__node_template.exportString()
+    def __draw_waypoint(self, waypoint: Waypoint):
+        waypoint_string = (
+            self.__waypoint_template.getDef()
+            + " "
+            + self.__waypoint_template.exportString()
         )
-        new_node_string = re.sub(
-            r"translation .*", f"translation {node.x} {node.y} 0", template_string
+
+        # changing the translation of the waypoint
+        waypoint_string = re.sub(
+            r"translation .*",
+            f"translation {waypoint.x} {waypoint.y} 0",
+            waypoint_string,
         )
-        new_node_string = re.sub(r'name ".*"', f'name "{node.name}"', new_node_string)
-        new_node_string = re.sub(r".*(Solid.*)", r"\1", new_node_string)
-        if node.name == "goal":
-            # color it green
-            new_node_string = re.sub(
-                r"baseColor .*", "baseColor 0 1 0", new_node_string
+
+        # changing the name of the waypoint
+        waypoint_string = re.sub(
+            r'name ".*"', f'name "{waypoint.name}"', waypoint_string
+        )
+
+        # changing the color of the start and goal waypoints
+        waypoint_string = re.sub(r".*(Solid.*)", r"\1", waypoint_string)
+        if waypoint.name == "goal":  # color it green
+            waypoint_string = re.sub(
+                r"baseColor .*", "baseColor 0 1 0", waypoint_string
             )
-        elif node.name == "start":
-            # color it yellow
-            new_node_string = re.sub(
-                r"baseColor .*", "baseColor 1 1 0", new_node_string
+        elif waypoint.name == "start":  # color it yellow
+            waypoint_string = re.sub(
+                r"baseColor .*", "baseColor 1 1 0", waypoint_string
             )
 
-        # Import the modified node string
-        self.__root_children.importMFNodeFromString(-1, new_node_string)
+        # import the modified waypoint string
+        self.__root_children.importMFNodeFromString(-1, waypoint_string)
 
-    def __insert_edge(self, node_a, node_b, *, is_path=True, thickness=0.01):
-        from math import atan2, sqrt
+    def __draw_path_segment(
+        self, waypoint_1, waypoint_2, *, is_path=True, thickness=0.01
+    ):
+        # finding the vector from waypoint_a to waypoint_b
+        delta_x = waypoint_2.x - waypoint_1.x
+        delta_y = waypoint_2.y - waypoint_1.y
 
-        # Vector from node_a to node_b
-        dx = node_b.x - node_a.x
-        dy = node_b.y - node_a.y
+        length = sqrt(delta_x**2 + delta_y**2)
+        angle = atan2(delta_y, delta_x)
 
-        length = sqrt(dx**2 + dy**2)
-
-        mid_x = (node_a.x + node_b.x) / 2
-        mid_y = (node_a.y + node_b.y) / 2
-
-        angle = atan2(dy, dx)
+        mid_x = (waypoint_1.x + waypoint_2.x) / 2
+        mid_y = (waypoint_1.y + waypoint_2.y) / 2
 
         color = "0 1 0" if is_path else "0 0 0"
 
@@ -63,7 +68,7 @@ class Supervisor(Supervisor):
         cube_string = f"""
         Transform {{
             translation {mid_x} {mid_y} 0
-            rotation 0 0 1 {angle}  # Rotate to align along the vector between nodes
+            rotation 0 0 1 {angle}  # Rotate to align along the vector between waypoints
             children [Shape {{
                 appearance MattePaint {{
                     baseColor {color}
@@ -77,24 +82,24 @@ class Supervisor(Supervisor):
         self.__root_children.importMFNodeFromString(-1, cube_string)
 
     def render_graph(self):
-        for node, neighbors in self.__graph.get_adjacency_graph().items():
-            self.__insert_node(node)
+        for waypoint, neighbors in self.__graph.get_adjacency_graph().items():
+            self.__draw_waypoint(waypoint)
             for neighbor, _ in neighbors:
-                is_path = False
                 try:
-                    n1 = self.__path.index(node)
-                    n2 = self.__path.index(neighbor)
-                    is_path = n2 == n1 + 1
+                    is_path = (
+                        self.__path.index(neighbor) == self.__path.index(waypoint) + 1
+                    )
                 except ValueError:
-                    pass
-                self.__insert_edge(node, neighbor, is_path=is_path)
+                    is_path = False
+                self.__draw_path_segment(waypoint, neighbor, is_path=is_path)
+
+    def set_robot_initial_position(self):
+        start_position = [*self.__graph.get_start().to_numpy(), 0]
+        self.__epuck.getField("translation").setSFVec3f(start_position)
 
 
-deliberative_layer = DeliberativeLayer(graph)
-path = deliberative_layer.get_path()
-supervisor = Supervisor(graph, path)
-supervisor.render_graph()
-
-pos_field = supervisor._epuck.getField("translation")
-new_pos = [*graph.get_start().to_numpy(), 0]
-pos_field.setSFVec3f(new_pos)
+if __name__ == "__main__":
+    path = a_star(graph)
+    supervisor = Supervisor(graph, path)
+    supervisor.render_graph()
+    supervisor.set_robot_initial_position()

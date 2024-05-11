@@ -1,6 +1,14 @@
 from dataclasses import dataclass
-from typing import Dict, List, Tuple, Callable
+from typing import Dict, List, Optional, Tuple, Callable
 import numpy as np
+
+
+class PathTraversalCompleted(Exception):
+    pass
+
+
+class PathDoesNotExist(Exception):
+    pass
 
 
 @dataclass(frozen=True)
@@ -43,14 +51,14 @@ class ObstaclesMap:
         Args:
             obstacles (List[Rectangle]): a list of rectangular obstacles.
         """
-        self.__obstacles = []
+        self.__obstacles: List[Tuple[Point, Point, Point, Point]] = []
         # storing the four points of the rectangle
         for rectangle in rectangular_obstacles:
             top_left = rectangle.top_left
             bottom_right = rectangle.bottom_right
             top_right = Point(bottom_right.x, top_left.y)
             bottom_left = Point(top_left.x, bottom_right.y)
-            self.__obstacles.append([top_left, top_right, bottom_right, bottom_left])
+            self.__obstacles.append((top_left, top_right, bottom_right, bottom_left))
 
     def __get_perpendicular_distance(self, point: Point, line: Line) -> float:
         A = point.x - line.start.x
@@ -97,8 +105,8 @@ class Graph:
         adjacency_graph: Dict[Waypoint, Neighbors],
         start: Waypoint,
         goal: Waypoint,
-        cost_function: Callable,
-        heuristic_function: Callable,
+        cost_function: Callable[[Waypoint, Waypoint], float],
+        heuristic_function: Callable[[Waypoint, Waypoint], float],
     ) -> None:
         self.__start = start
         self.__goal = goal
@@ -108,11 +116,11 @@ class Graph:
         closest_to_goal = (None, float("inf"))
         self.__adjacency_graph: Dict[Waypoint, NeighborsWithCosts] = dict()
         for waypoint, neighbors in adjacency_graph.items():
-            distance = Graph.euclidean_distance(waypoint, self.__start)
+            distance = euclidean_distance(waypoint, self.__start)
             if distance < closest_to_start[1]:
                 closest_to_start = (waypoint, distance)
 
-            distance = Graph.euclidean_distance(waypoint, self.__goal)
+            distance = euclidean_distance(waypoint, self.__goal)
             if distance < closest_to_goal[1]:
                 closest_to_goal = (waypoint, distance)
 
@@ -146,7 +154,7 @@ class Graph:
     def get_adjacency_graph(self):
         return self.__adjacency_graph
 
-    def get_heuristic(self, current: Waypoint, goal) -> float:
+    def get_heuristic(self, current: Waypoint, goal: Waypoint) -> float:
         """Calculates the heuristic value between the current waypoint and the goal."""
         return self.__heuristic_function(current, goal)
 
@@ -156,35 +164,21 @@ class Graph:
     def get_goal(self) -> Waypoint:
         return self.__goal
 
-    @staticmethod
-    def euclidean_distance(a: Waypoint, b: Waypoint):
-        return np.linalg.norm(a.to_numpy() - b.to_numpy())
-
-    def no_heuristic(*_) -> float:
-        return 0
-
-
-class PathTraversalCompleted(Exception):
-    pass
-
-
-class PathDoesNotExist(Exception):
-    pass
-
 
 class DeliberativeLayer:
     def __init__(self, graph: Graph) -> None:
         self.__graph = graph
         self.__path = iter(a_star(self.__graph))
 
-    def get_path(self) -> Path:
-        return list(self.__path)
-
     def get_next_waypoint(self) -> Waypoint:
         try:
             return next(self.__path)
         except StopIteration:
             raise PathTraversalCompleted("The path has been traversed.")
+
+
+def euclidean_distance(waypoint_1: Waypoint, waypoint_2: Waypoint) -> float:
+    return np.linalg.norm(waypoint_1.to_numpy() - waypoint_2.to_numpy())
 
 
 def a_star(graph: Graph) -> Path:
