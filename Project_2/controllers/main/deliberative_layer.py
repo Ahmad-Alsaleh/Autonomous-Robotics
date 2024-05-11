@@ -41,7 +41,11 @@ class Line:
 Waypoint = Point
 Neighbors = List[Waypoint]
 NeighborsWithCosts = List[Tuple[Waypoint, float]]
-Path = List[Waypoint]
+
+
+class Path(List[Waypoint]):
+    def __repr__(self) -> str:
+        return " --> ".join(map(str, self))
 
 
 class ObstaclesMap:
@@ -167,12 +171,15 @@ class Graph:
 
 class DeliberativeLayer:
     def __init__(self, graph: Graph) -> None:
-        self.__graph = graph
-        self.__path = iter(a_star(self.__graph))
+        self.__path = a_star(graph)
+        self.__path_iterator = iter(self.__path)
+
+    def get_path(self) -> Path:
+        return self.__path
 
     def get_next_waypoint(self) -> Waypoint:
         try:
-            return next(self.__path)
+            return next(self.__path_iterator)
         except StopIteration:
             raise PathTraversalCompleted("The path has been traversed.")
 
@@ -182,7 +189,10 @@ def euclidean_distance(waypoint_1: Waypoint, waypoint_2: Waypoint) -> float:
 
 
 def a_star(graph: Graph) -> Path:
-    """Returns the path found by A-Star."""
+    """
+    Returns the path found by A-Star.
+    The heuristic and cost functions are provided by the `graph` object.
+    """
     start = graph.get_start()
     goal = graph.get_goal()
     open_list = set([start])
@@ -205,7 +215,7 @@ def a_star(graph: Graph) -> Path:
                 n = parents[n]
             reconstruction_path.append(start)
             reconstruction_path.reverse()
-            return reconstruction_path
+            return Path(reconstruction_path)
         for m, weight in graph.get_neighbors(n):
             if m not in open_list and m not in closed_list:
                 open_list.add(m)

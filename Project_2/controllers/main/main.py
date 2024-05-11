@@ -13,8 +13,14 @@ PATH_TYPE = "safest"
 TEST_ID = "test4"
 
 waypoints = constants.get_waypoints()
-start, goal = constants.get_start_and_goal(TEST_ID)
 cost_func, heuristic_func = constants.get_cost_and_heuristic_functions(PATH_TYPE)
+
+start, goal = constants.get_start_and_goal(TEST_ID)
+# alternatively, you can set the start and goal points manually
+# uncomment the following lines to do so:
+# from main.deliberative_layer import Waypoint
+# start = Waypoint(0.75, 1.0, "start")
+# goal = Waypoint(0.95, 0.37, "goal")
 
 graph = Graph(
     adjacency_graph=waypoints,
@@ -26,11 +32,13 @@ graph = Graph(
 
 if __name__ == "__main__":
     print("Starting simulation...")
-    print(f"Path type: {PATH_TYPE}")
     print(f"Test ID: {TEST_ID}")
+    print(f"Path type: {PATH_TYPE}")
+
+    deliberative_layer = DeliberativeLayer(graph)
+    print("Path:\n", deliberative_layer.get_path())
 
     robot = Robot()
-    deliberative_layer = DeliberativeLayer(graph)
     speed_controller = APFController(robot, deliberative_layer)
 
     while robot.simulator_step() != -1:
