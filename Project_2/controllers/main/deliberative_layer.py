@@ -45,7 +45,7 @@ Path = List[Waypoint]
 
 
 class ObstaclesMap:
-    def __init__(self, rectangular_obstacles: List[Rectangle]):
+    def __init__(self, rectangular_obstacles: List[Rectangle]) -> None:
         """Representation of the rectangular obstacles on the map
 
         Args:
@@ -151,7 +151,7 @@ class Graph:
         """Returns a list of neighbors for a given waypoint."""
         return self.__adjacency_graph[waypoint]
 
-    def get_adjacency_graph(self):
+    def get_adjacency_graph(self) -> Dict[Waypoint, NeighborsWithCosts]:
         return self.__adjacency_graph
 
     def get_heuristic(self, current: Waypoint, goal: Waypoint) -> float:

@@ -1,8 +1,9 @@
 import os, sys
-from typing import Callable, Literal, Tuple
+from typing import Callable, Dict, Literal, Tuple
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from main.deliberative_layer import (
+    Neighbors,
     Waypoint,
     ObstaclesMap,
     Rectangle,
@@ -76,7 +77,7 @@ def get_start_and_goal(
     return start, goal
 
 
-def get_waypoints():
+def get_waypoints() -> Dict[Waypoint, Neighbors]:
     p1 = Waypoint(0.17, 0.97, "p1")
     p2 = Waypoint(0.37, 1.05, "p2")
     p3 = Waypoint(0.17, 0.78, "p3")

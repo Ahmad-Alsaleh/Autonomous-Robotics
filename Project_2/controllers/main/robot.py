@@ -51,7 +51,7 @@ class Robot(Robot):
         _, _, yaw = self.__imu.getRollPitchYaw()
         return np.float64(yaw)
 
-    def get_sensors_angles(self):
+    def get_sensors_angles(self) -> np.ndarray:
         return self.get_current_angle() + Robot.RELATIVE_ANGLES_OF_DISTANCE_SENSORS
 
     def get_distances(self) -> np.ndarray:
@@ -66,6 +66,6 @@ class Robot(Robot):
         self.__left_motor.setVelocity(left_speed)
         self.__right_motor.setVelocity(right_speed)
 
-    def simulator_step(self):
+    def simulator_step(self) -> int:
         """Runs a single step in the simulator."""
         return self.step(self.__time_step)

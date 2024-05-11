@@ -16,7 +16,7 @@ class Supervisor(Supervisor):
         self.__epuck = self.getFromDef("EPUCK")
         self.__waypoint_template = self.getFromDef("WAYPOINT_TEMPLATE")
 
-    def __draw_waypoint(self, waypoint: Waypoint):
+    def __draw_waypoint(self, waypoint: Waypoint) -> None:
         waypoint_string = (
             self.__waypoint_template.getDef()
             + " "
@@ -81,7 +81,7 @@ class Supervisor(Supervisor):
         """
         self.__root_children.importMFNodeFromString(-1, cube_string)
 
-    def render_graph(self):
+    def render_graph(self) -> None:
         for waypoint, neighbors in self.__graph.get_adjacency_graph().items():
             self.__draw_waypoint(waypoint)
             for neighbor, _ in neighbors:
@@ -93,7 +93,7 @@ class Supervisor(Supervisor):
                     is_path = False
                 self.__draw_path_segment(waypoint, neighbor, is_path=is_path)
 
-    def set_robot_initial_position(self):
+    def set_robot_initial_position(self) -> None:
         start_position = [*self.__graph.get_start().to_numpy(), 0]
         self.__epuck.getField("translation").setSFVec3f(start_position)
 
