@@ -120,10 +120,12 @@ class Graph:
         closest_to_goal = (None, float("inf"))
         self.__adjacency_graph: Dict[Waypoint, NeighborsWithCosts] = dict()
         for waypoint, neighbors in adjacency_graph.items():
+            # finding the closest waypoint to the start
             distance = euclidean_distance(waypoint, self.__start)
             if distance < closest_to_start[1]:
                 closest_to_start = (waypoint, distance)
 
+            # finding the closest waypoint to the goal
             distance = euclidean_distance(waypoint, self.__goal)
             if distance < closest_to_goal[1]:
                 closest_to_goal = (waypoint, distance)
@@ -135,18 +137,20 @@ class Graph:
                 (neighbor, cost_function(neighbor, waypoint)) for neighbor in neighbors
             ]
 
-        # connecting the start and goal to the rest of the graph
+        # connecting the start to the rest of the graph
         closest_to_start = closest_to_start[0]
-        closest_to_goal = closest_to_goal[0]
         self.__adjacency_graph[self.__start] = [
             (closest_to_start, cost_function(closest_to_start, self.__start))
-        ]
-        self.__adjacency_graph[self.__goal] = [
-            (closest_to_goal, cost_function(closest_to_goal, self.__goal))
         ]
         self.__adjacency_graph[closest_to_start].append(
             (self.__start, cost_function(self.__start, closest_to_start))
         )
+
+        # connecting the goal to the rest of the graph
+        closest_to_goal = closest_to_goal[0]
+        self.__adjacency_graph[self.__goal] = [
+            (closest_to_goal, cost_function(closest_to_goal, self.__goal))
+        ]
         self.__adjacency_graph[closest_to_goal].append(
             (self.__goal, cost_function(self.__goal, closest_to_goal))
         )
