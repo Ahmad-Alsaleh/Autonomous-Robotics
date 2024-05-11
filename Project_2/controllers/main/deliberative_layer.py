@@ -116,6 +116,15 @@ class Graph:
         self.__goal = goal
         self.__heuristic_function = heuristic_function
 
+        # if the adjacency graph is not provided, create a simple
+        # graph with the start and goal points connected to each other
+        if not adjacency_graph:
+            self.__adjacency_graph = {
+                self.__start: [(self.__goal, cost_function(self.__goal, self.__start))],
+                self.__goal: [(self.__start, cost_function(self.__start, self.__goal))],
+            }
+            return
+
         closest_to_start = (None, float("inf"))
         closest_to_goal = (None, float("inf"))
         self.__adjacency_graph: Dict[Waypoint, NeighborsWithCosts] = dict()
