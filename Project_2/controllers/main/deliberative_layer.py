@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple, Callable
+from typing import Dict, List, Tuple, Callable
 import numpy as np
 
 
@@ -142,6 +142,7 @@ class Graph:
             # appending the cost to each each neighbor
             # i.e.: {waypoint_1: [neighbor_1, neighbor_2, ...], ...} becomes
             # {waypoint_1: [(neighbor_1, cost_1), (neighbor_2, cost_2), ...], ...}
+            # Note how neighbor_i was replaced by the tuple (neighbor_i, cost_i)
             self.__adjacency_graph[waypoint] = [
                 (neighbor, cost_function(neighbor, waypoint)) for neighbor in neighbors
             ]
