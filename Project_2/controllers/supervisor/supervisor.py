@@ -62,7 +62,7 @@ class Supervisor(Supervisor):
         mid_x = (waypoint_1.x + waypoint_2.x) / 2
         mid_y = (waypoint_1.y + waypoint_2.y) / 2
 
-        color = "0 1 0" if is_path else "0 0 0"
+        color = "1 1 1" if is_path else "0 0 0"
 
         # VRML string for the cube
         cube_string = f"""
