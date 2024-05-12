@@ -9,7 +9,7 @@ from main import constants
 # choose from ["safest", "shortest"]
 PATH_TYPE = "shortest"
 
-# choose from ["test1", "test2", "test3", "test4"]
+# choose from ["test1", "test2", "test3", "test4", "extra1"]
 TEST_ID = "test1"
 
 waypoints = constants.get_waypoints()
