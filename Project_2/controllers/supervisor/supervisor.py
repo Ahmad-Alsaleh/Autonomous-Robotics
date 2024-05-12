@@ -3,7 +3,7 @@ import os, sys, re
 from math import atan2, sqrt
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from main.deliberative_layer import Graph, Waypoint, DeliberativeLayer, Path, a_star
+from main.deliberative_layer import Graph, Waypoint, Path, a_star
 from main.main import graph
 
 
@@ -87,7 +87,8 @@ class Supervisor(Supervisor):
             for neighbor, _ in neighbors:
                 try:
                     is_path = (
-                        self.__path.index(neighbor) == self.__path.index(waypoint) + 1
+                        abs(self.__path.index(neighbor) - self.__path.index(waypoint))
+                        == 1
                     )
                 except ValueError:
                     is_path = False
