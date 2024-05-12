@@ -16,8 +16,7 @@ class APFController:
         self.__distance_threshold = distance_to_goal_threshold
         self.__final_goal_reached: bool = False
         self.__deliberative_layer = deliberative_layer
-        self.__robot.simulator_step()  # essential to enable gps in order to obtain initial distance to goal
-        self.__destination = self.__get_destination()
+        self.__destination = self.__get_destination() # next waypoint
 
     def __get_destination(self) -> Waypoint:
         return self.__deliberative_layer.get_next_waypoint()
