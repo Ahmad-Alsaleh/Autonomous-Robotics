@@ -36,7 +36,7 @@ def get_cost_and_heuristic_functions(
             ]
         )
         cost_function = obstacle_map.get_closest_obstacle_distance
-        heuristic_function = lambda x, y: 0
+        heuristic_function = obstacle_map.get_closest_obstacle_distance
     else:
         raise ValueError("Invalid path type. Choose between 'shortest' and 'safest'.")
 
@@ -49,7 +49,7 @@ def get_start_and_goal(
     tests = {
         "test1": {
             "start": (0.07, 1.05),
-            "goal": (0.44, 0.52),
+            "goal": (0.4412, 0.5227),
         },
         "test2": {
             "start": (0.75, 1.01),

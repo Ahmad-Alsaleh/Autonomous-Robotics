@@ -10,7 +10,7 @@ class APFController:
         robot: Robot,
         deliberative_layer: DeliberativeLayer,
         *,
-        distance_to_goal_threshold: float = 0.1,
+        distance_to_goal_threshold: float = 0.05,
     ) -> None:
         self.__robot = robot
         self.__distance_threshold = distance_to_goal_threshold

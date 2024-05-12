@@ -7,10 +7,10 @@ from main.robot import Robot
 from main import constants
 
 # choose from ["safest", "shortest"]
-PATH_TYPE = "safest"
+PATH_TYPE = "shortest"
 
 # choose from ["test1", "test2", "test3", "test4"]
-TEST_ID = "test4"
+TEST_ID = "test1"
 
 waypoints = constants.get_waypoints()
 cost_func, heuristic_func = constants.get_cost_and_heuristic_functions(PATH_TYPE)
