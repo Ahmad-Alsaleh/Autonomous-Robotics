@@ -50,11 +50,7 @@ class Path(List[Waypoint]):
 
 class ObstaclesMap:
     def __init__(self, rectangular_obstacles: List[Rectangle]) -> None:
-        """Representation of the rectangular obstacles on the map
-
-        Args:
-            obstacles (List[Rectangle]): a list of rectangular obstacles.
-        """
+        """Representation of the rectangular obstacles on the map"""
         self.__obstacles: List[Tuple[Point, Point, Point, Point]] = []
         # storing the four points of the rectangle
         for rectangle in rectangular_obstacles:
