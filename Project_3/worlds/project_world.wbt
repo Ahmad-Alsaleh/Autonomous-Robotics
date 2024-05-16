@@ -6,12 +6,13 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/project
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/robots/gctronic/e-puck/protos/E-puck.proto"
 IMPORTABLE EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/appearances/protos/MattePaint.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/solids/protos/SolidBox.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/drinks/protos/Can.proto"
 
 WorldInfo {
 }
 Viewpoint {
-  orientation -0.5773502691896258 0.5773502691896258 0.5773502691896258 2.0944
-  position 0.5610718977606177 0.5547233279166781 3.7507391450456997
+  orientation -0.3634769526718306 0.3783162023896651 0.8513291701133363 1.6914522964741503
+  position 0.4701776702706661 -1.4503033180751008 2.221906512342367
 }
 TexturedBackground {
 }
@@ -31,6 +32,8 @@ DEF EPUCK E-puck {
   translation 0.068 1.045 -0.0004479
   rotation -0.01101169598682545 0.0012114595584877502 -0.9999386355758197 1.37711
   controller "main"
+  camera_width 224
+  camera_height 224
   turretSlot [
     InertialUnit {
       name "IMU"
@@ -261,4 +264,7 @@ SolidBox {
     roughness 0.5
     metalness 0
   }
+}
+Can {
+  translation 0.376899 0.754698 0.06
 }

@@ -1,10 +1,10 @@
 import os, sys
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from main.deliberative_layer import Graph, DeliberativeLayer
 from main.apf_controller import APFController
 from main.robot import Robot
 from main import constants
+from main.object_recognizer import ObjectRecognizer
 
 # choose from ["safest", "shortest"]
 PATH_TYPE = "shortest"
@@ -40,9 +40,16 @@ if __name__ == "__main__":
 
     robot = Robot()
     speed_controller = APFController(robot, deliberative_layer)
-
+    object_recognizer = ObjectRecognizer()
     while robot.simulator_step() != -1:
         left_speed, right_speed = speed_controller.compute_motors_speed()
         robot.set_motors_speeds(left_speed, right_speed)
         if speed_controller.final_goal_reached():
             break
+        # object recognition part
+        image = robot.get_image()
+        if image is not None:
+            detected_objects = object_recognizer.detect_objects(image)
+            if detected_objects is not None:
+                for obj in detected_objects:
+                    print(f"Object detected at: {obj}")
