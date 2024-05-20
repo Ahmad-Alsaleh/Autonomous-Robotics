@@ -10,13 +10,14 @@ class APFController:
         robot: Robot,
         deliberative_layer: DeliberativeLayer,
         *,
-        distance_to_goal_threshold: float = 0.05,
+        distance_to_goal_threshold: float = 0.1,
     ) -> None:
         self.__robot = robot
         self.__distance_threshold = distance_to_goal_threshold
         self.__final_goal_reached: bool = False
         self.__deliberative_layer = deliberative_layer
-        self.__destination = self.__get_destination() # next waypoint
+        # self.__destination = self.__get_destination() # next waypoint
+        self.__destination = None
 
     def __get_destination(self) -> Waypoint:
         return self.__deliberative_layer.get_next_waypoint()
@@ -27,7 +28,7 @@ class APFController:
 
     def __get_attractive_force(self, max_magnitude=5) -> np.ndarray:
         heading = self.__get_heading_vector()
-        return (max_magnitude / np.linalg.norm(heading)) * (heading)
+        return (max_magnitude / (np.linalg.norm(heading) + 1e-6)) * (heading)
 
     def __get_distance_to_waypoint(self) -> float:
         return np.linalg.norm(self.__get_heading_vector())
@@ -84,6 +85,9 @@ class APFController:
         return self.__final_goal_reached
 
     def compute_motors_speed(self) -> Tuple[float, float]:
+        if self.__destination is None:
+            self.__destination = self.__get_destination()
+
         distance_to_waypoint = self.__get_distance_to_waypoint()
         total_force = self.__get_total_force()
 
@@ -95,7 +99,7 @@ class APFController:
                 print(f"Going to {self.__destination}.")
             except PathTraversalCompleted:
                 print("Final goal reached!!")
-                self.__final_goal_reached = True
+                # self.__final_goal_reached = True
                 return 0, 0
 
         target_goal = np.arctan2(total_force[1], total_force[0])
