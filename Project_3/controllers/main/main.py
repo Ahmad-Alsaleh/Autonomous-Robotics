@@ -9,6 +9,7 @@ from main.object_recognizer import ObjectRecognizer
 from main.deliberative_layer import PathDoesNotExist, Waypoint
 import random
 
+random.seed(0)
 
 if __name__ == "__main__":
     print("Starting simulation...")
