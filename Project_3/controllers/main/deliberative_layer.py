@@ -84,7 +84,7 @@ class ObstaclesMap:
         obstacle: Tuple[Point, Point, Point, Point], robot_radius: float
     ) -> Tuple[Point, Point, Point, Point]:
         """Enlarges the given obstacle by the robot radius."""
-        top_left, top_right, bottom_right, bottom_left = obstacle
+        top_left, _, bottom_right, _ = obstacle
 
         enlarged_top_left = Point(top_left.x - robot_radius, top_left.y + robot_radius)
         enlarged_bottom_right = Point(

@@ -25,8 +25,10 @@ if __name__ == "__main__":
             # generate a new random goal
 
             start = tuple(robot.get_current_position())
-            
-            while deliberative_layer.is_inside_obstacle(Waypoint(*(goal := (random.uniform(*area), random.uniform(*area))))):
+
+            while deliberative_layer.is_inside_obstacle(
+                Waypoint(*(goal := (random.uniform(*AREA), random.uniform(*AREA))))
+            ):
                 print(f"Goal: {goal} is inside an obstacle. Generating new goal...")
 
             print(
