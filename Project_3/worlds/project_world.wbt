@@ -230,36 +230,6 @@ SolidBox {
     metalness 0
   }
 }
-SolidBox {
-  translation 0.328737 0.388933 0.04
-  name "Workstation A"
-  size 0.06 0.06 0.1
-  appearance PBRAppearance {
-    baseColor 1 0.52549 0.113725
-    roughness 0.5
-    metalness 0
-  }
-}
-SolidBox {
-  translation 0.969485 0.488068 0.04
-  name "Workstation B"
-  size 0.06 0.06 0.1
-  appearance PBRAppearance {
-    baseColor 1 0.52549 0.113725
-    roughness 0.5
-    metalness 0
-  }
-}
-SolidBox {
-  translation 0.967378 0.236864 0.04
-  name "Workstation C"
-  size 0.06 0.06 0.1
-  appearance PBRAppearance {
-    baseColor 1 0.52549 0.113725
-    roughness 0.5
-    metalness 0
-  }
-}
 Can {
   translation 0.730219 0.482272 0.06
 }
