@@ -65,8 +65,8 @@ class Path(List[Waypoint]):
 
 class ObstaclesMap:
     def __init__(self, rectangular_obstacles: List[Rectangle]) -> None:
-        self.__rectangle_obstacles = rectangular_obstacles
         """Representation of the rectangular obstacles on the map"""
+        self.__rectangle_obstacles = rectangular_obstacles
         self.__obstacles: List[Tuple[Point, Point, Point, Point]] = []
         # storing the four points of the rectangle
         for rectangle in rectangular_obstacles:
@@ -495,7 +495,7 @@ class RRTStar(RRT):
         """
 
         self.node_list = [self.start]
-        for i in range(self.max_iter):
+        for _ in range(self.max_iter):
             # print("Iter:", i, ", number of nodes:", len(self.node_list))
             rnd = self.get_random_node()
             nearest_ind = self.get_nearest_node_index(self.node_list, rnd)

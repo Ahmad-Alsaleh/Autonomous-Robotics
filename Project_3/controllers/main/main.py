@@ -12,14 +12,17 @@ import random
 
 if __name__ == "__main__":
     print("Starting simulation...")
-    area = [0, 1.12]
-    deliberative_layer = DeliberativeLayer(obstacle_map, rand_area=area, expand_dis=0.1)
 
+    AREA = [0, 1.12]
+
+    deliberative_layer = DeliberativeLayer(obstacle_map, rand_area=AREA, expand_dis=0.1)
     robot = Robot()
     speed_controller = APFController(robot, deliberative_layer)
     object_recognizer = ObjectRecognizer()
+
     while robot.simulator_step() != -1:
         if deliberative_layer.get_path() is None:
+            # generate a new random goal
 
             start = tuple(robot.get_current_position())
             
@@ -42,8 +45,7 @@ if __name__ == "__main__":
 
         left_speed, right_speed = speed_controller.compute_motors_speed()
         robot.set_motors_speeds(left_speed, right_speed)
-        # if speed_controller.final_goal_reached():
-        #     break
+
         # object recognition part
         image = robot.get_image()
         if image is not None:
