@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, List, Tuple, Callable
+from typing import List, Tuple
 import numpy as np
 import math
 import matplotlib.pyplot as plt
@@ -329,7 +329,7 @@ class RRT:
             lambda event: [exit(0) if event.key == "escape" else None],
         )
         if rnd is not None:
-            plt.plot(rnd.x, rnd.y, "^k")
+            plt.plot(rnd.x, rnd.y, "^r") # the random node
             if self.robot_radius > 0.0:
                 self.plot_circle(rnd.x, rnd.y, self.robot_radius, "-r")
         for node in self.node_list:
@@ -360,18 +360,17 @@ class RRT:
                 "-k",
             )
 
-        plt.plot(self.start.x, self.start.y, "xr")
-        plt.plot(self.end.x, self.end.y, "xr")
+        plt.plot(self.start.x, self.start.y, "or") # the start
+        plt.plot(self.end.x, self.end.y, "xr") # the goal
         plt.axis("equal")
         plt.axis([self.min_rand, self.max_rand, self.min_rand, self.max_rand])
-        plt.grid(True)
         plt.pause(0.01)
 
     @staticmethod
     def plot_rectangle(rect: Rectangle, color="b"):
         x_min, y_min, x_max, y_max = rect.to_list()
         rectangle = plt.Rectangle(
-            (x_min, y_min), x_max - x_min, y_max - y_min, fill=False, edgecolor=color
+            (x_min, y_min), x_max - x_min, y_max - y_min, fill=True, edgecolor=color
         )
         plt.gca().add_patch(rectangle)
 
@@ -729,6 +728,14 @@ class DeliberativeLayer:
         )
         self.__path = rrt_star.planning(animation=show_animation)
         self.__path_iterator = iter(self.__path)
+        if show_animation: # plot the final path
+            plt.plot(
+                [point.x for point in self.__path],
+                [point.y for point in self.__path],
+                "-r",
+                linewidth=2.5,
+            )
+            plt.pause(0.01)
 
     def get_path(self) -> Path:
         return self.__path

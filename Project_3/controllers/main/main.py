@@ -9,9 +9,9 @@ from main.object_recognizer import ObjectRecognizer
 from main.deliberative_layer import PathDoesNotExist, Waypoint
 import random
 
-random.seed(0)
 
 if __name__ == "__main__":
+    random.seed(0)
     print("Starting simulation...")
 
     AREA = [0, 1.12]
@@ -35,12 +35,9 @@ if __name__ == "__main__":
             print(
                 f"Start: {Waypoint(start[0], start[1])}, Goal: {Waypoint(goal[0], goal[1])}"
             )
-
             while True:
                 try:
-
-                    deliberative_layer.generate_path(start, goal, show_animation=False)
-
+                    deliberative_layer.generate_path(start, goal, show_animation=True)
                     print("Path generated!")
                     break
                 except PathDoesNotExist:
