@@ -497,7 +497,7 @@ class RRTStar(RRT):
         """
 
         self.node_list = [self.start]
-        for _ in range(self.max_iter):
+        for i in range(self.max_iter):
             # print("Iter:", i, ", number of nodes:", len(self.node_list))
             rnd = self.get_random_node()
             nearest_ind = self.get_nearest_node_index(self.node_list, rnd)
@@ -518,7 +518,7 @@ class RRTStar(RRT):
                 else:
                     self.node_list.append(new_node)
 
-            if animation:
+            if animation and i % 10 == 0:
                 self.draw_graph(rnd)
 
             if (not self.search_until_max_iter) and new_node:  # if reaches goal
