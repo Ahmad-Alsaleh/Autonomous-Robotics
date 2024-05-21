@@ -31,7 +31,7 @@ class Robot(Robot):
 
         self.__imu = self.getDevice("IMU")
         self.__imu.enable(self.__time_step)
-        
+
         self.__camera = self.getDevice("camera")
         self.__camera.enable(self.__time_step)
 
@@ -48,12 +48,14 @@ class Robot(Robot):
     def get_current_position(self) -> np.ndarray:
         """Returns the (x, y) position of the robot from the GPS device."""
         return np.array(self.__gps.getValues())[:2]
-    
+
     def get_image(self):
         """Returns RGB channels of the image from the camera."""
-        img = self.__camera.getImageArray() # returns RGBA image
-        return np.array(img, dtype=np.uint8)[:, :, :3] # remove alpha channel and return image
-    
+        img = self.__camera.getImageArray()  # returns RGBA image
+        return np.array(img, dtype=np.uint8)[
+            :, :, :3
+        ]  # remove alpha channel and return image
+
     def get_current_angle(self) -> np.float64:
         """Returns the yaw angle of the robot in radians"""
         _, _, yaw = self.__imu.getRollPitchYaw()
