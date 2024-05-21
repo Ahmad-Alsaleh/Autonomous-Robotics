@@ -9,12 +9,12 @@ from main.object_recognizer import ObjectRecognizer
 from main.deliberative_layer import PathDoesNotExist, Waypoint
 import random
 
+SHOW_ANIMATION = True
+AREA = [0, 1.12]
 
 if __name__ == "__main__":
     random.seed(0)
     print("Starting simulation...")
-
-    AREA = [0, 1.12]
 
     deliberative_layer = DeliberativeLayer(obstacle_map, rand_area=AREA, expand_dis=0.1)
     robot = Robot()
@@ -37,7 +37,9 @@ if __name__ == "__main__":
             )
             while True:
                 try:
-                    deliberative_layer.generate_path(start, goal, show_animation=True)
+                    deliberative_layer.generate_path(
+                        start, goal, show_animation=SHOW_ANIMATION
+                    )
                     print("Path generated!")
                     break
                 except PathDoesNotExist:

@@ -329,7 +329,7 @@ class RRT:
             lambda event: [exit(0) if event.key == "escape" else None],
         )
         if rnd is not None:
-            plt.plot(rnd.x, rnd.y, "^r") # the random node
+            plt.plot(rnd.x, rnd.y, "^r")  # the random node
             if self.robot_radius > 0.0:
                 self.plot_circle(rnd.x, rnd.y, self.robot_radius, "-r")
         for node in self.node_list:
@@ -360,8 +360,8 @@ class RRT:
                 "-k",
             )
 
-        plt.plot(self.start.x, self.start.y, "or") # the start
-        plt.plot(self.end.x, self.end.y, "xr") # the goal
+        plt.plot(self.start.x, self.start.y, "or")  # the start
+        plt.plot(self.end.x, self.end.y, "xr")  # the goal
         plt.axis("equal")
         plt.axis([self.min_rand, self.max_rand, self.min_rand, self.max_rand])
         plt.pause(0.01)
@@ -728,7 +728,7 @@ class DeliberativeLayer:
         )
         self.__path = rrt_star.planning(animation=show_animation)
         self.__path_iterator = iter(self.__path)
-        if show_animation: # plot the final path
+        if show_animation:  # plot the final path
             plt.plot(
                 [point.x for point in self.__path],
                 [point.y for point in self.__path],
