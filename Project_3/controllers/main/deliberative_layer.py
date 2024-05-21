@@ -704,9 +704,9 @@ class DeliberativeLayer:
         self.__path = None
         self.__path_iterator = None
 
-    def is_inside_obstacle(self, point: Point) -> bool:
+    def is_inside_obstacle(self, point: Tuple[float, float]) -> bool:
         return self.__obstacle_map.is_inside_obstacle(
-            point, robot_radius=self.ROBOT_RADIUS
+            Waypoint(*point), robot_radius=self.ROBOT_RADIUS
         )
 
     def generate_path(

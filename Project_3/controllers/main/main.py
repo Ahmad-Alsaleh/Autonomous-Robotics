@@ -27,7 +27,7 @@ if __name__ == "__main__":
             start = tuple(robot.get_current_position())
 
             while deliberative_layer.is_inside_obstacle(
-                Waypoint(*(goal := (random.uniform(*AREA), random.uniform(*AREA))))
+                (goal := (random.uniform(*AREA), random.uniform(*AREA)))
             ):
                 print(f"Goal: {goal} is inside an obstacle. Generating new goal...")
 
@@ -38,7 +38,7 @@ if __name__ == "__main__":
             while True:
                 try:
 
-                    deliberative_layer.generate_path(start, goal, show_animation=True)
+                    deliberative_layer.generate_path(start, goal, show_animation=False)
 
                     print("Path generated!")
                     break
