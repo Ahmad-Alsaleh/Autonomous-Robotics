@@ -60,6 +60,12 @@ NeighborsWithCosts = List[Tuple[Waypoint, float]]
 
 class Path(List[Waypoint]):
     def __repr__(self) -> str:
+        if len(self) > 4:
+            return (
+                " --> ".join(map(str, self[:2]))
+                + " ... "
+                + " --> ".join(map(str, self[-2:]))
+            )
         return " --> ".join(map(str, self))
 
 
