@@ -78,6 +78,7 @@ class ObstaclesMap:
 
     def __iter__(self):
         return iter(self.__rectangle_obstacles)
+
     @staticmethod
     def __enlarge_obstacle(
         obstacle: Tuple[Point, Point, Point, Point], robot_radius: float
@@ -103,7 +104,9 @@ class ObstaclesMap:
     def is_inside_obstacle(self, point: Point, robot_radius: float = 0) -> bool:
         """Checks if the point is inside any of the obstacles."""
         for obstacle in self.__obstacles:
-            if self.__is_inside_obstacle(point, self.__enlarge_obstacle(obstacle, robot_radius)):
+            if self.__is_inside_obstacle(
+                point, self.__enlarge_obstacle(obstacle, robot_radius)
+            ):
                 return True
         return False
 
@@ -686,10 +689,10 @@ class DeliberativeLayer:
     def __init__(
         self,
         obstacle_map: ObstaclesMap,
-        rand_area=[0, 1.14],
+        rand_area=(0, 1.14),
         path_resolution=0.001,
         expand_dis=0.05,
-        play_area=[0, 1.12, 0, 1.12],
+        play_area=(0, 1.12, 0, 1.12),
         max_iter=1000,
     ) -> None:
         self.__obstacle_map = obstacle_map
@@ -702,7 +705,9 @@ class DeliberativeLayer:
         self.__path_iterator = None
 
     def is_inside_obstacle(self, point: Point) -> bool:
-        return self.__obstacle_map.is_inside_obstacle(point, robot_radius=self.ROBOT_RADIUS)
+        return self.__obstacle_map.is_inside_obstacle(
+            point, robot_radius=self.ROBOT_RADIUS
+        )
 
     def generate_path(
         self,
