@@ -9,7 +9,6 @@ from main.apf_controller import APFController
 from main.robot import Robot
 from main.constants import obstacle_map, map_area
 from main.object_recognizer import ObjectRecognizer
-from main.deliberative_layer import Waypoint
 
 SHOW_RRT_ANIMATION = True
 ENABLE_OBJECT_DETECTION = True
@@ -27,8 +26,8 @@ def get_random_goal(deliberative_layer: DeliberativeLayer) -> Tuple[float, float
 def detect_objects(image, object_recognizer):
     detected_objects = object_recognizer.detect_objects(image)
     if detected_objects is not None:
-        for obj in detected_objects:
-            logging.info(f"Object detected at: {obj}")
+        for object_location in detected_objects:
+            logging.info(f"Object detected at: {object_location}")
 
 
 if __name__ == "__main__":
@@ -55,17 +54,14 @@ if __name__ == "__main__":
         if deliberative_layer.get_path() is None:
             start = robot.get_current_position()
             goal = get_random_goal(deliberative_layer)
-            logging.info(
-                f"Start: {Waypoint(*start, 'start')}, Goal: {Waypoint(*goal, 'goal')}"
-            )
             path = deliberative_layer.generate_path(
                 start, goal, show_animation=SHOW_RRT_ANIMATION
             )
-            logging.info(f"Path:\n{path}")
+            logging.info(f"Path: {path}")
 
         left_speed, right_speed = speed_controller.compute_motors_speed()
         robot.set_motors_speeds(left_speed, right_speed)
 
         if ENABLE_OBJECT_DETECTION:
-            image = robot.get_image()
+            image = robot.get_camera_image()
             detect_objects(image, object_recognizer)

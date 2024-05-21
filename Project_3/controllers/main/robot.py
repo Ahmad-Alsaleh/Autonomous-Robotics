@@ -49,7 +49,7 @@ class Robot(Robot):
         """Returns the (x, y) position of the robot from the GPS device."""
         return np.array(self.__gps.getValues())[:2]
 
-    def get_image(self):
+    def get_camera_image(self):
         """Returns RGB channels of the image from the camera."""
         img = self.__camera.getImageArray()  # returns RGBA image
         return np.array(img, dtype=np.uint8)[
