@@ -149,7 +149,7 @@ Robot {
     }
   ]
   name "supervisor"
-  controller "supervisor"
+  controller "visualizer"
   supervisor TRUE
 }
 DEF WAYPOINT_TEMPLATE Solid {

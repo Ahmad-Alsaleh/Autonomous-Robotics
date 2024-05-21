@@ -4,6 +4,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from main.deliberative_layer import Waypoint, ObstaclesMap, Rectangle
 
 
+map_area = [0, 1.12]
+
 obstacle_map = ObstaclesMap(
     [
         # the 7 rectangular obstacles
