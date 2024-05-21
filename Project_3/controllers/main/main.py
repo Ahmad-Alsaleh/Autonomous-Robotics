@@ -1,11 +1,12 @@
 import os, sys
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from main.deliberative_layer import DeliberativeLayer
 from main.apf_controller import APFController
 from main.robot import Robot
 from main.constants import obstacle_map
 from main.object_recognizer import ObjectRecognizer
-from main.deliberative_layer import PathDoesNotExist
+from main.deliberative_layer import PathDoesNotExist, Waypoint
 import random
 
 
@@ -21,12 +22,18 @@ if __name__ == "__main__":
         if deliberative_layer.get_path() is None:
 
             start = tuple(robot.get_current_position())
-            # goal = (random.uniform(*area), random.uniform(*area))
-            goal =  (0.54, 0.11)
+            
+            while deliberative_layer.is_inside_obstacle(Waypoint(*(goal := (random.uniform(*area), random.uniform(*area))))):
+                print(f"Goal: {goal} is inside an obstacle. Generating new goal...")
+
+            print(
+                f"Start: {Waypoint(start[0], start[1])}, Goal: {Waypoint(goal[0], goal[1])}"
+            )
+
             while True:
                 try:
 
-                    deliberative_layer.generate_path(start, goal, show_animation=False)
+                    deliberative_layer.generate_path(start, goal, show_animation=True)
 
                     print("Path generated!")
                     break

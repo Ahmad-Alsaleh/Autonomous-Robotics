@@ -78,7 +78,50 @@ class ObstaclesMap:
 
     def __iter__(self):
         return iter(self.__rectangle_obstacles)
-    
+    @staticmethod
+    def __enlarge_obstacle(
+        obstacle: Tuple[Point, Point, Point, Point], robot_radius: float
+    ) -> Tuple[Point, Point, Point, Point]:
+        """Enlarges the given obstacle by the robot radius."""
+        top_left, top_right, bottom_right, bottom_left = obstacle
+
+        enlarged_top_left = Point(top_left.x - robot_radius, top_left.y + robot_radius)
+        enlarged_bottom_right = Point(
+            bottom_right.x + robot_radius, bottom_right.y - robot_radius
+        )
+
+        enlarged_top_right = Point(enlarged_bottom_right.x, enlarged_top_left.y)
+        enlarged_bottom_left = Point(enlarged_top_left.x, enlarged_bottom_right.y)
+
+        return (
+            enlarged_top_left,
+            enlarged_top_right,
+            enlarged_bottom_right,
+            enlarged_bottom_left,
+        )
+
+    def is_inside_obstacle(self, point: Point, robot_radius: float = 0) -> bool:
+        """Checks if the point is inside any of the obstacles."""
+        for obstacle in self.__obstacles:
+            if self.__is_inside_obstacle(point, self.__enlarge_obstacle(obstacle, robot_radius)):
+                return True
+        return False
+
+    def __is_inside_obstacle(
+        self, point: Point, obstacle: Tuple[Point, Point, Point, Point]
+    ) -> bool:
+        """Checks if the point is inside the given obstacle."""
+        count = 0
+        for i in range(len(obstacle)):
+            a, b = obstacle[i], obstacle[(i + 1) % len(obstacle)]
+
+            if ((point.y < a.y) != (point.y < b.y)) and point.x < (b.x - a.x) * (
+                point.y - a.y
+            ) / (b.y - a.y) + a.x:
+                count += 1
+
+        return count % 2 == 1
+
     def __get_perpendicular_distance(self, point: Point, line: Line) -> float:
         A = point.x - line.start.x
         B = point.y - line.start.y
@@ -116,135 +159,6 @@ class ObstaclesMap:
                 if dist < min_distance:
                     min_distance = dist
         return 1.0 / min_distance if min_distance != float("inf") else 1e-6
-
-
-class Graph:
-    def __init__(
-        self,
-        adjacency_graph: Dict[Waypoint, Neighbors],
-        start: Waypoint,
-        goal: Waypoint,
-        cost_function: Callable[[Waypoint, Waypoint], float],
-        heuristic_function: Callable[[Waypoint, Waypoint], float],
-    ) -> None:
-        self.__start = start
-        self.__goal = goal
-        self.__heuristic_function = heuristic_function
-
-        # if the adjacency graph is not provided, create a simple
-        # graph with the start and goal points connected to each other
-        if not adjacency_graph:
-            self.__adjacency_graph = {
-                self.__start: [(self.__goal, cost_function(self.__goal, self.__start))],
-                self.__goal: [(self.__start, cost_function(self.__start, self.__goal))],
-            }
-            return
-
-        closest_to_start = (None, float("inf"))
-        closest_to_goal = (None, float("inf"))
-        self.__adjacency_graph: Dict[Waypoint, NeighborsWithCosts] = dict()
-        for waypoint, neighbors in adjacency_graph.items():
-            # finding the closest waypoint to the start
-            distance = euclidean_distance(waypoint, self.__start)
-            if distance < closest_to_start[1]:
-                closest_to_start = (waypoint, distance)
-
-            # finding the closest waypoint to the goal
-            distance = euclidean_distance(waypoint, self.__goal)
-            if distance < closest_to_goal[1]:
-                closest_to_goal = (waypoint, distance)
-
-            # appending the cost to each each neighbor
-            # i.e.: {waypoint_1: [neighbor_1, neighbor_2, ...], ...} becomes
-            # {waypoint_1: [(neighbor_1, cost_1), (neighbor_2, cost_2), ...], ...}
-            # Note how neighbor_i was replaced by the tuple (neighbor_i, cost_i)
-            self.__adjacency_graph[waypoint] = [
-                (neighbor, cost_function(neighbor, waypoint)) for neighbor in neighbors
-            ]
-
-        # connecting the start to the rest of the graph
-        closest_to_start = closest_to_start[0]
-        self.__adjacency_graph[self.__start] = [
-            (closest_to_start, cost_function(closest_to_start, self.__start))
-        ]
-        self.__adjacency_graph[closest_to_start].append(
-            (self.__start, cost_function(self.__start, closest_to_start))
-        )
-
-        # connecting the goal to the rest of the graph
-        closest_to_goal = closest_to_goal[0]
-        self.__adjacency_graph[self.__goal] = [
-            (closest_to_goal, cost_function(closest_to_goal, self.__goal))
-        ]
-        self.__adjacency_graph[closest_to_goal].append(
-            (self.__goal, cost_function(self.__goal, closest_to_goal))
-        )
-
-    def get_neighbors(self, waypoint: Waypoint) -> Neighbors:
-        """Returns a list of neighbors for a given waypoint."""
-        return self.__adjacency_graph[waypoint]
-
-    def get_adjacency_graph(self) -> Dict[Waypoint, NeighborsWithCosts]:
-        return self.__adjacency_graph
-
-    def get_heuristic(self, current: Waypoint, goal: Waypoint) -> float:
-        """Calculates the heuristic value between the current waypoint and the goal."""
-        return self.__heuristic_function(current, goal)
-
-    def get_start(self) -> Waypoint:
-        return self.__start
-
-    def get_goal(self) -> Waypoint:
-        return self.__goal
-
-
-def euclidean_distance(waypoint_1: Waypoint, waypoint_2: Waypoint) -> float:
-    return np.linalg.norm(waypoint_1.to_numpy() - waypoint_2.to_numpy())
-
-
-def a_star(graph: Graph) -> Path:
-    """
-    Returns the path found by A-Star.
-    The heuristic and cost functions are provided by the `graph` object.
-    """
-    start = graph.get_start()
-    goal = graph.get_goal()
-    open_list = set([start])
-    closed_list = set([])
-    g = {start: 0}
-    parents = {start: start}
-    while len(open_list) > 0:
-        n = None
-        for v in open_list:
-            if n == None or g[v] + graph.get_heuristic(v, goal) < g[
-                n
-            ] + graph.get_heuristic(n, goal):
-                n = v
-        if n == None:
-            raise PathDoesNotExist
-        if n == goal:
-            reconstruction_path = []
-            while parents[n] != n:
-                reconstruction_path.append(n)
-                n = parents[n]
-            reconstruction_path.append(start)
-            reconstruction_path.reverse()
-            return Path(reconstruction_path)
-        for m, weight in graph.get_neighbors(n):
-            if m not in open_list and m not in closed_list:
-                open_list.add(m)
-                parents[m] = n
-                g[m] = g[n] + weight
-            else:
-                if g[m] > g[n] + weight:
-                    g[m] = g[n] + weight
-                    parents[m] = n
-                    if m in closed_list:
-                        closed_list.remove(m)
-                        open_list.add(m)
-        open_list.remove(n)
-        closed_list.add(n)
-    raise PathDoesNotExist
 
 
 class RRT:
@@ -771,14 +685,14 @@ class DeliberativeLayer:
 
     def __init__(
         self,
-        obstacle_list,
+        obstacle_map: ObstaclesMap,
         rand_area=[0, 1.14],
         path_resolution=0.001,
         expand_dis=0.05,
         play_area=[0, 1.12, 0, 1.12],
         max_iter=1000,
     ) -> None:
-        self.__obstacle_list = obstacle_list
+        self.__obstacle_map = obstacle_map
         self.__rand_area = rand_area
         self.__path_resolution = path_resolution
         self.__expand_dis = expand_dis
@@ -787,13 +701,21 @@ class DeliberativeLayer:
         self.__path = None
         self.__path_iterator = None
 
-    def generate_path(self, start: Tuple[float, float], goal: Tuple[float, float], show_animation=False):
-        """ Raises PathDoesNotExist if the path does not exist."""
+    def is_inside_obstacle(self, point: Point) -> bool:
+        return self.__obstacle_map.is_inside_obstacle(point, robot_radius=self.ROBOT_RADIUS)
+
+    def generate_path(
+        self,
+        start: Tuple[float, float],
+        goal: Tuple[float, float],
+        show_animation=False,
+    ):
+        """Raises PathDoesNotExist if the path does not exist."""
         rrt_star = RRTStar(
             start=start,
             goal=goal,
             rand_area=self.__rand_area,
-            obstacle_list=self.__obstacle_list,
+            obstacle_list=self.__obstacle_map,
             path_resolution=self.__path_resolution,
             expand_dis=self.__expand_dis,
             play_area=self.__play_area,

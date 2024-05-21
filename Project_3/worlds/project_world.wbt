@@ -12,7 +12,7 @@ WorldInfo {
 }
 Viewpoint {
   orientation -0.5601341287613136 0.5633902952396822 0.6073229231854731 2.044869155055007
-  position 0.7300429893878413 0.33507452514640956 3.247871712159154
+  position 0.7296506336907477 0.2673848801485286 3.909793688676299
 }
 TexturedBackground {
 }
@@ -138,12 +138,6 @@ DEF EPUCK E-puck {
       leadSize 0.004
     }
   ]
-}
-Robot {
-  translation -0.09 0 0
-  name "supervisor"
-  controller "supervisor"
-  supervisor TRUE
 }
 DEF WAYPOINT_TEMPLATE Solid {
   translation 0.19 0.97 -0.24
