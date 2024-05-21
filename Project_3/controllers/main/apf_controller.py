@@ -1,3 +1,4 @@
+import logging
 from typing import Tuple
 from main.robot import Robot
 from main.deliberative_layer import Waypoint, DeliberativeLayer, PathTraversalCompleted
@@ -14,9 +15,7 @@ class APFController:
     ) -> None:
         self.__robot = robot
         self.__distance_threshold = distance_to_goal_threshold
-        self.__final_goal_reached: bool = False
         self.__deliberative_layer = deliberative_layer
-        # self.__destination = self.__get_destination() # next waypoint
         self.__destination = None
 
     def __get_destination(self) -> Waypoint:
@@ -81,9 +80,6 @@ class APFController:
         """Sums the repulsive force with the attractive force"""
         return self.__get_total_repulsive_force() + self.__get_attractive_force()
 
-    def final_goal_reached(self) -> bool:
-        return self.__final_goal_reached
-
     def compute_motors_speed(self) -> Tuple[float, float]:
         if self.__destination is None:
             self.__destination = self.__get_destination()
@@ -93,13 +89,10 @@ class APFController:
 
         # stop if too close to the goal
         if distance_to_waypoint <= self.__distance_threshold:
-            print(f"{self.__destination} reached.", end=" ")
+            logging.info(f"{self.__destination} reached.")
             try:
                 self.__destination = self.__get_destination()
-                print(f"Going to {self.__destination}.")
             except PathTraversalCompleted:
-                print("Final goal reached!!")
-                # self.__final_goal_reached = True
                 return 0, 0
 
         target_goal = np.arctan2(total_force[1], total_force[0])

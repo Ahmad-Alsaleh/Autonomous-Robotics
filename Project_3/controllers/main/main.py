@@ -1,57 +1,71 @@
 import os, sys
+from typing import Tuple
+import random
+import logging
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from main.deliberative_layer import DeliberativeLayer
 from main.apf_controller import APFController
 from main.robot import Robot
-from main.constants import obstacle_map
+from main.constants import obstacle_map, map_area
 from main.object_recognizer import ObjectRecognizer
-from main.deliberative_layer import PathDoesNotExist, Waypoint
-import random
+from main.deliberative_layer import Waypoint
 
-SHOW_ANIMATION = True
-AREA = [0, 1.12]
+SHOW_RRT_ANIMATION = True
+ENABLE_OBJECT_DETECTION = True
+ENABLE_LOGGING = True
+
+
+def get_random_goal(deliberative_layer: DeliberativeLayer) -> Tuple[float, float]:
+    goal = random.uniform(*map_area), random.uniform(*map_area)
+    while deliberative_layer.is_inside_obstacle(goal):
+        logging.info(f"Goal: {goal} is inside an obstacle. Generating new goal...")
+        goal = random.uniform(*map_area), random.uniform(*map_area)
+    return goal
+
+
+def detect_objects(image, object_recognizer):
+    detected_objects = object_recognizer.detect_objects(image)
+    if detected_objects is not None:
+        for obj in detected_objects:
+            logging.info(f"Object detected at: {obj}")
+
 
 if __name__ == "__main__":
     random.seed(0)
-    print("Starting simulation...")
+    logging.basicConfig(
+        level=logging.INFO if ENABLE_LOGGING else logging.CRITICAL, format="%(message)s"
+    )
 
-    deliberative_layer = DeliberativeLayer(obstacle_map, rand_area=AREA, expand_dis=0.1)
+    logging.info("Starting simulation...")
+    logging.info(
+        f"""Options:
+        - {SHOW_RRT_ANIMATION = }
+        - {ENABLE_OBJECT_DETECTION = }
+        - {ENABLE_LOGGING = }
+    """
+    )
+
+    deliberative_layer = DeliberativeLayer(obstacle_map, map_area=map_area)
     robot = Robot()
     speed_controller = APFController(robot, deliberative_layer)
     object_recognizer = ObjectRecognizer()
 
     while robot.simulator_step() != -1:
         if deliberative_layer.get_path() is None:
-            # generate a new random goal
-
-            start = tuple(robot.get_current_position())
-
-            while deliberative_layer.is_inside_obstacle(
-                (goal := (random.uniform(*AREA), random.uniform(*AREA)))
-            ):
-                print(f"Goal: {goal} is inside an obstacle. Generating new goal...")
-
-            print(
-                f"Start: {Waypoint(start[0], start[1])}, Goal: {Waypoint(goal[0], goal[1])}"
+            start = robot.get_current_position()
+            goal = get_random_goal(deliberative_layer)
+            logging.info(
+                f"Start: {Waypoint(*start, 'start')}, Goal: {Waypoint(*goal, 'goal')}"
             )
-            while True:
-                try:
-                    deliberative_layer.generate_path(
-                        start, goal, show_animation=SHOW_ANIMATION
-                    )
-                    print("Path generated!")
-                    break
-                except PathDoesNotExist:
-                    pass
+            path = deliberative_layer.generate_path(
+                start, goal, show_animation=SHOW_RRT_ANIMATION
+            )
+            logging.info(f"Path:\n{path}")
 
         left_speed, right_speed = speed_controller.compute_motors_speed()
         robot.set_motors_speeds(left_speed, right_speed)
 
-        # object recognition part
-        image = robot.get_image()
-        if image is not None:
-            detected_objects = object_recognizer.detect_objects(image)
-            if detected_objects is not None:
-                for obj in detected_objects:
-                    print(f"Object detected at: {obj}")
+        if ENABLE_OBJECT_DETECTION:
+            image = robot.get_image()
+            detect_objects(image, object_recognizer)

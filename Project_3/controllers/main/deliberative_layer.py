@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import logging
 from typing import List, Tuple
 import numpy as np
 import math
@@ -504,7 +505,6 @@ class RRTStar(RRT):
 
         self.node_list = [self.start]
         for i in range(self.max_iter):
-            # print("Iter:", i, ", number of nodes:", len(self.node_list))
             rnd = self.get_random_node()
             nearest_ind = self.get_nearest_node_index(self.node_list, rnd)
             new_node = self.steer(self.node_list[nearest_ind], rnd, self.expand_dis)
@@ -694,14 +694,14 @@ class DeliberativeLayer:
     def __init__(
         self,
         obstacle_map: ObstaclesMap,
-        rand_area=(0, 1.14),
+        map_area,
         path_resolution=0.001,
-        expand_dis=0.05,
+        expand_dis=0.1,
         play_area=(0, 1.12, 0, 1.12),
         max_iter=1000,
     ) -> None:
         self.__obstacle_map = obstacle_map
-        self.__rand_area = rand_area
+        self.__rand_area = map_area
         self.__path_resolution = path_resolution
         self.__expand_dis = expand_dis
         self.__play_area = play_area
@@ -719,7 +719,8 @@ class DeliberativeLayer:
         start: Tuple[float, float],
         goal: Tuple[float, float],
         show_animation=False,
-    ):
+        retry_on_failure=True,
+    ) -> Path:
         """Raises PathDoesNotExist if the path does not exist."""
         rrt_star = RRTStar(
             start=start,
@@ -732,8 +733,17 @@ class DeliberativeLayer:
             robot_radius=self.ROBOT_RADIUS,
             max_iter=self.__max_iter,
         )
-        self.__path = rrt_star.planning(animation=show_animation)
-        self.__path_iterator = iter(self.__path)
+
+        while True:
+            try:
+                self.__path = rrt_star.planning(animation=show_animation)
+                self.__path_iterator = iter(self.__path)
+                break
+            except PathDoesNotExist:
+                if not retry_on_failure:
+                    raise
+                logging.info("Failed to find a path. Retrying...")
+
         if show_animation:  # plot the final path
             plt.plot(
                 [point.x for point in self.__path],
@@ -742,6 +752,8 @@ class DeliberativeLayer:
                 linewidth=2.5,
             )
             plt.pause(0.01)
+
+        return self.__path
 
     def get_path(self) -> Path:
         return self.__path
