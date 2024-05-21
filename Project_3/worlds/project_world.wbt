@@ -140,6 +140,18 @@ DEF EPUCK E-puck {
     }
   ]
 }
+Robot {
+  translation -0.09 0 0
+  children [
+    Display {
+      width 256
+      height 256
+    }
+  ]
+  name "supervisor"
+  controller "supervisor"
+  supervisor TRUE
+}
 DEF WAYPOINT_TEMPLATE Solid {
   translation 0.19 0.97 -0.24
   children [
