@@ -102,13 +102,22 @@ class APFController:
             np.sin(angle_difference), np.cos(angle_difference)
         )
 
-        raw_speed = self.__map(
+        raw_speed_angle_component = self.__map(
             abs(angle_difference),
             np.pi / 2,
             0,
             0,
             self.__robot.MAX_SPEED,
         )
+        raw_speed_distance_component = self.__map(
+            distance_to_waypoint,
+            0,
+            1,
+            0,
+            self.__robot.MAX_SPEED,
+        )
+        
+        raw_speed = 0.875*raw_speed_angle_component + 0.125*raw_speed_distance_component
         angle_difference = self.__filter_angle(angle_difference)
 
         left_speed = raw_speed - angle_difference
