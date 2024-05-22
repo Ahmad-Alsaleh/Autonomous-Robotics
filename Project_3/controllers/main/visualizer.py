@@ -104,6 +104,9 @@ class Visualizer:
 
         color = "1 1 1" if is_path else "0 0 0"
 
+        if length <= 1e-4:
+            length = 1e-4
+
         # VRML string for the cube
         cube_string = f"""
         DEF EDGE_TEMPLATE_{PROTO_COUNTER} Transform {{
