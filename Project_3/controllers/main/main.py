@@ -41,6 +41,11 @@ if __name__ == "__main__":
     # wander around the map, avoid obstacles and detect objects
     counter = 0
     while robot.simulator_step() != -1:
+        # Quit simulation by pressing Q
+        if robot.getKey() == ord("Q"):
+            robot.saveDisplay("map.png")
+            break
+
         # 1. generate path
         if deliberative_layer.get_path() is None:
             start = robot.get_current_position()

@@ -5,13 +5,11 @@ from robot import Robot
 from math import atan2, sqrt
 import re
 from controller import Supervisor
+from constants import play_area
 
 WIDTH, HEIGHT = 256, 256
 BACKGROUND_COLOR = 0x000000
-MAP_MIN_X = 0
-MAP_MAX_X = 1.12
-MAP_MIN_Y = 0
-MAP_MAX_Y = 1.12
+MAP_MIN_X, MAP_MAX_X, MAP_MIN_Y, MAP_MAX_Y = play_area
 
 PROTO_COUNTER = 0
 

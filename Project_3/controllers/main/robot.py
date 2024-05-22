@@ -1,4 +1,5 @@
 from controller import Robot
+from controller import Keyboard
 import numpy as np
 
 
@@ -26,6 +27,9 @@ class Robot(Robot):
 
         self.__pen = self.getDevice("pen")
 
+        self.__keyboard = self.getKeyboard()
+        self.__keyboard.enable(self.__time_step)
+
         self.__gps = self.getDevice("gps")
         self.__gps.enable(self.__time_step)
 
@@ -34,6 +38,8 @@ class Robot(Robot):
 
         self.__camera = self.getDevice("camera")
         self.__camera.enable(self.__time_step)
+
+        self.__display = self.getDevice("display")
 
         self.__distance_sensors = [self.getDevice(f"ds{i}") for i in range(8)]
         for ds in self.__distance_sensors:
@@ -79,3 +85,9 @@ class Robot(Robot):
     def simulator_step(self) -> int:
         """Runs a single step in the simulator."""
         return self.step(self.__time_step)
+
+    def getKey(self):
+        return self.__keyboard.getKey()
+
+    def saveDisplay(self, filename: str):
+        self.__display.imageSave(None, filename)
