@@ -9,6 +9,7 @@ from main.apf_controller import APFController
 from main.robot import Robot
 from main.constants import obstacle_map, map_area
 from main.object_recognizer import ObjectRecognizer
+from visualizer import Visualizer
 
 SHOW_RRT_ANIMATION = True
 ENABLE_OBJECT_DETECTION = True
@@ -21,13 +22,6 @@ def get_random_goal(deliberative_layer: DeliberativeLayer) -> Tuple[float, float
         logging.info(f"Goal: {goal} is inside an obstacle. Generating new goal...")
         goal = random.uniform(*map_area), random.uniform(*map_area)
     return goal
-
-
-def detect_objects(image, object_recognizer):
-    detected_objects = object_recognizer.detect_objects(image)
-    if detected_objects is not None:
-        for object_location in detected_objects:
-            logging.info(f"Object detected at: {object_location}")
 
 
 if __name__ == "__main__":
@@ -49,6 +43,8 @@ if __name__ == "__main__":
     robot = Robot()
     speed_controller = APFController(robot, deliberative_layer)
     object_recognizer = ObjectRecognizer()
+    visualizer = Visualizer(robot, obstacle_map)
+    visualizer.draw_obstacles()
 
     while robot.simulator_step() != -1:
         if deliberative_layer.get_path() is None:
@@ -64,4 +60,8 @@ if __name__ == "__main__":
 
         if ENABLE_OBJECT_DETECTION:
             image = robot.get_camera_image()
-            detect_objects(image, object_recognizer)
+            detected_objects = object_recognizer.detect_objects(image)
+            if detected_objects is not None:
+                for object_location in detected_objects:
+                    logging.info(f"Object detected at: {object_location}")
+                    visualizer.draw_detected_objects((256 // 2, 256 // 2))

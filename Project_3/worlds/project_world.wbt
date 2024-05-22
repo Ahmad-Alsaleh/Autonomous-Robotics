@@ -33,9 +33,14 @@ DEF EPUCK E-puck {
   translation 0.073141 1.04239 -0.0004479
   rotation -0.01101169598682545 0.0012114595584877502 -0.9999386355758197 1.37711
   controller "main"
+  supervisor TRUE
   camera_width 224
   camera_height 224
   turretSlot [
+    Display {
+      width 256
+      height 256
+    }
     InertialUnit {
       name "IMU"
     }
@@ -140,18 +145,6 @@ DEF EPUCK E-puck {
     }
   ]
 }
-Robot {
-  translation -0.09 0 0
-  children [
-    Display {
-      width 256
-      height 256
-    }
-  ]
-  name "supervisor"
-  controller "visualizer"
-  supervisor TRUE
-}
 DEF WAYPOINT_TEMPLATE Solid {
   translation 0.19 0.97 -0.24
   children [
@@ -243,5 +236,5 @@ SolidBox {
   }
 }
 Can {
-  translation 0.730219 0.482272 0.06
+  translation 0.0913507 0.608978 0.06
 }

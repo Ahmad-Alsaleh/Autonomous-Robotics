@@ -1,11 +1,10 @@
 from typing import Tuple
-from controller import Supervisor
-import os, sys, re, numpy as np
-from math import atan2, sqrt
+import os, sys, numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from main.deliberative_layer import ObstaclesMap, Rectangle
 from main.constants import obstacle_map
+from main.robot import Robot
 
 WIDTH, HEIGHT = 256, 256
 MAP_MIN_X = 0
@@ -14,11 +13,11 @@ MAP_MIN_Y = 0
 MAP_MAX_Y = 1.12
 
 
-class Visualizer(Supervisor):
-    def __init__(self, obstacle_map: ObstaclesMap) -> None:
+class Visualizer:
+    def __init__(self, robot: Robot, obstacle_map: ObstaclesMap) -> None:
         super().__init__()
-        self.__epuck = self.getFromDef("EPUCK")
-        self.__display = self.getDevice("display")
+        self.__robot = robot
+        self.__display = self.__robot.getDevice("display")
         self.__obstacle_map = obstacle_map
 
     def __map(self, value, from_lower, from_higher, to_lower, to_higher):
@@ -44,21 +43,17 @@ class Visualizer(Supervisor):
         self.__display.fillRectangle(x, HEIGHT - y, width, height)
 
     def draw_detected_objects(self, location: Tuple):
-        visualizer.setDisplayColor(0xFF00FF)
+        self.__set_display_color(0xFF00FF)
         self.__display.fillOval(*location, 7, 7)
 
     def draw_obstacles(self) -> None:
-        visualizer.setDisplayColor(0x0000FF)
+        self.__set_display_color(0x0000FF)
         for obstacle in self.__obstacle_map:
             self.__draw_obstacle(obstacle)
 
-    def setDisplayColor(self, color: int) -> None:
+    def __set_display_color(self, color: int) -> None:
         """Color is given as a hexadecimal number. For example, 0xFF00FF is purple."""
         self.__display.setColor(color)
-
-    def set_robot_initial_position(self) -> None:
-        start_position = [*self.__graph.get_start().to_numpy(), 0]
-        self.__epuck.getField("translation").setSFVec3f(start_position)
 
 
 if __name__ == "__main__":
