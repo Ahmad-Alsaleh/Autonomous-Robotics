@@ -1,5 +1,5 @@
 import random
-import logging
+from logger import Logger
 from deliberative_layer import DeliberativeLayer
 from apf_controller import APFController
 from robot import Robot
@@ -10,7 +10,6 @@ from visualizer import Visualizer
 
 # general options
 SHOW_RRT_ANIMATION = True  # use matplotlib to show the RRT algorithm
-ENABLE_LOGGING = True  # print useful messages
 
 # object detection options
 ENABLE_OBJECT_DETECTION = True  # enable object detection
@@ -19,17 +18,13 @@ SKIP_FRAMES = 8  # increase this number to increase simulation speed at the cost
 
 if __name__ == "__main__":
     random.seed(0)
-    logging.basicConfig(
-        level=logging.INFO if ENABLE_LOGGING else logging.CRITICAL, format="%(message)s"
-    )
 
-    logging.info("Starting simulation...")
-    logging.info(
+    Logger.success("Starting simulation...")
+    Logger.warning(
         f"""Options:
         - {SHOW_RRT_ANIMATION = }
         - {ENABLE_OBJECT_DETECTION = }
         - {OBJECT_DETECTION_ALGORITHM = }
-        - {ENABLE_LOGGING = }
     """
     )
 
@@ -55,7 +50,7 @@ if __name__ == "__main__":
             )
             visualizer.draw_path_on_map(path)
             visualizer.draw_path_on_display(path)
-            logging.info(f"Path: {path}")
+            Logger.info(f"Path: {path}")
 
         # 2. follow path
         left_speed, right_speed = speed_controller.compute_motors_speed()
@@ -70,7 +65,7 @@ if __name__ == "__main__":
             )
             if detected_objects is not None:
                 for object_location in detected_objects:
-                    logging.info(f"Object detected at: {object_location}")
+                    Logger.success(f"Object detected at: {object_location}")
                     visualizer.draw_detected_objects(object_location)
 
         counter = (counter + 1) % SKIP_FRAMES

@@ -1,9 +1,8 @@
-import logging
 from typing import Tuple
 from robot import Robot
 from deliberative_layer import Waypoint, DeliberativeLayer, PathTraversalCompleted
 import numpy as np
-
+from logger import Logger
 
 class APFController:
     def __init__(
@@ -92,7 +91,7 @@ class APFController:
 
         # stop if too close to the goal
         if distance_to_waypoint <= self.__distance_threshold:
-            logging.info(f"{self.__destination} reached.")
+            Logger.info(f"{self.__destination} reached.")
             try:
                 self.__destination = self.__get_destination()
             except PathTraversalCompleted:

@@ -1,11 +1,10 @@
 from dataclasses import dataclass
-import logging
 from typing import List, Tuple
 import numpy as np
 import math
 import matplotlib.pyplot as plt
 import random
-
+from logger import Logger
 
 class PathTraversalCompleted(Exception):
     pass
@@ -744,7 +743,7 @@ class DeliberativeLayer:
                 random.uniform(*self.__rand_area),
             )
         ):
-            logging.info(f"Goal: {goal} is inside an obstacle. Generating new goal...")
+            Logger.warning(f"Goal: {goal} is inside an obstacle. Generating new goal...")
         return goal
 
     def generate_path(
@@ -776,7 +775,7 @@ class DeliberativeLayer:
             except PathDoesNotExist:
                 if not retry_on_failure:
                     raise
-                logging.info("Failed to find a path. Retrying...")
+                Logger.warning("Failed to find a path. Retrying...")
 
         if show_animation:  # plot the final path
             plt.plot(
