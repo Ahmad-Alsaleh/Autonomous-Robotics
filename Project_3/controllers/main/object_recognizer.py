@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 import random
 import torch
+from matplotlib import use
 
 
 # -------------------------------------
@@ -133,6 +134,7 @@ class ObjectRecognizer:
         self.yolo_model = torch.hub.load(
             "ultralytics/yolov5", "yolov5s", pretrained=True, force_reload=False
         ).to("cpu")
+        use("TkAgg")  # use TkAgg backend to avoid conflicts with other libraries
 
     def compute_distance_and_angle(self, x_min, x_max, scene_image):
         """Computes the distance and angle of the target object in the scene image from the coordinates"""

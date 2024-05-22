@@ -6,7 +6,7 @@ from robot import Robot
 from constants import obstacle_map, rand_area, play_area
 from object_recognizer import ObjectRecognizer
 from visualizer import Visualizer
-from matplotlib import use
+
 
 # general options
 SHOW_RRT_ANIMATION = True  # use matplotlib to show the RRT algorithm
@@ -35,7 +35,6 @@ if __name__ == "__main__":
 
     # initialize objects
     object_recognizer = ObjectRecognizer()
-    use("TkAgg")  # use TkAgg backend to avoid conflicts with other libraries
     deliberative_layer = DeliberativeLayer(
         obstacle_map, rand_area=rand_area, play_area=play_area
     )
