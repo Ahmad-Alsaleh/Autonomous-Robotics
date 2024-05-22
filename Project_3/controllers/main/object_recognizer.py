@@ -131,8 +131,9 @@ class ObjectRecognizer:
         self.__focal_length = self.__target_image_gray.shape[1] / (
             2 * np.tan(self.__fov / 2)
         )
+        self.possibilities = ["cup", "bottle", "cell phone", "book"]
         self.yolo_model = torch.hub.load(
-            "ultralytics/yolov5", "yolov5s", pretrained=True, force_reload=False
+            "ultralytics/yolov5", "yolov5s", pretrained=True, force_reload=False, verbose=False
         ).to("cpu")
         use("TkAgg")  # use TkAgg backend to avoid conflicts with other libraries
 
@@ -217,7 +218,7 @@ class ObjectRecognizer:
         distance, angle = self.compute_distance_and_angle(x_min, x_max, scene_image)
         class_name = results.names[int(results.xyxy[0][0][5])]
         # print(class_name) # to show the class name of the detected object
-        if (class_name != "cup" and class_name != "bottle") or distance is None:
+        if (class_name not in self.possibilities) or distance is None:
             return None
         cv2.imwrite(r"test.jpg", scene_image)  # save the image with boxes
         distance = self.__map(distance, 0.15875, 0.21759, 0.3968, 0.5156)
