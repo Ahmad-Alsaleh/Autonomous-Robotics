@@ -3,7 +3,6 @@ import os, sys, numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from main.deliberative_layer import ObstaclesMap, Rectangle
-from main.constants import obstacle_map
 from main.robot import Robot
 
 WIDTH, HEIGHT = 256, 256
@@ -42,21 +41,35 @@ class Visualizer:
         height = self.__map_to_display(y_max - y_min, False)
         self.__display.fillRectangle(x, HEIGHT - y, width, height)
 
-    def draw_detected_objects(self, location: Tuple):
-        self.__set_display_color(0xFF00FF)
-        self.__display.fillOval(*location, 7, 7)
+    def draw_robot(self):
+        self.__display.setColor(0xFF0000)
+        self.__display.setOpacity(0.15)
 
-    def draw_obstacles(self) -> None:
-        self.__set_display_color(0x0000FF)
+        x = self.__map_to_display(self.__robot.get_current_position()[0], True)
+        y = self.__map_to_display(self.__robot.get_current_position()[1], False)
+        self.__display.fillOval(x, HEIGHT - y, 1, 1)
+
+    def draw_detected_objects(self, location: Tuple):
+        self.__display.setColor(0xFF00FF)
+        self.__display.setOpacity(0.3)
+
+        x = (
+            self.__robot.get_current_position()[0]
+            + location[0] * np.cos(self.__robot.get_current_angle())
+            - location[1] * np.sin(self.__robot.get_current_angle())
+        )
+        x = self.__map_to_display(x, True)
+
+        y = (
+            self.__robot.get_current_position()[1]
+            + location[0] * np.sin(self.__robot.get_current_angle())
+            + location[1] * np.cos(self.__robot.get_current_angle())
+        )
+        y = self.__map_to_display(y, False)
+
+        self.__display.fillOval(x, HEIGHT - y, 7, 7)
+
+    def draw_rectangular_obstacles(self) -> None:
+        self.__display.setColor(0x0000FF)
         for obstacle in self.__obstacle_map:
             self.__draw_obstacle(obstacle)
-
-    def __set_display_color(self, color: int) -> None:
-        """Color is given as a hexadecimal number. For example, 0xFF00FF is purple."""
-        self.__display.setColor(color)
-
-
-if __name__ == "__main__":
-    visualizer = Visualizer(obstacle_map)
-    visualizer.draw_obstacles()
-    # visualizer.draw_detected_objects()

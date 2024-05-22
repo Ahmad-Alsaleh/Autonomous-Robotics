@@ -44,7 +44,7 @@ if __name__ == "__main__":
     speed_controller = APFController(robot, deliberative_layer)
     object_recognizer = ObjectRecognizer()
     visualizer = Visualizer(robot, obstacle_map)
-    visualizer.draw_obstacles()
+    visualizer.draw_rectangular_obstacles()
 
     while robot.simulator_step() != -1:
         if deliberative_layer.get_path() is None:
@@ -57,6 +57,7 @@ if __name__ == "__main__":
 
         left_speed, right_speed = speed_controller.compute_motors_speed()
         robot.set_motors_speeds(left_speed, right_speed)
+        visualizer.draw_robot()
 
         if ENABLE_OBJECT_DETECTION:
             image = robot.get_camera_image()
@@ -64,4 +65,4 @@ if __name__ == "__main__":
             if detected_objects is not None:
                 for object_location in detected_objects:
                     logging.info(f"Object detected at: {object_location}")
-                    visualizer.draw_detected_objects((256 // 2, 256 // 2))
+                    visualizer.draw_detected_objects(object_location)
