@@ -151,7 +151,7 @@ class Visualizer:
     def __draw_detected_objects(self, location: Tuple):
         x, y = location
         self.__display.setColor(0xFF00FF)
-        self.__display.setOpacity(0.3)
+        self.__display.setOpacity(0.2)
         self.__display.fillOval(x, HEIGHT - y, 7, 7)
 
     def __refresh_display(self):
@@ -171,19 +171,15 @@ class Visualizer:
         y = self.__map_to_display(self.__robot.get_current_position()[1], False)
         self.__display.fillOval(x, HEIGHT - y, 1, 1)
 
-    def draw_detected_objects(self, location: Tuple):
-        x = (
-            self.__robot.get_current_position()[0]
-            + location[0] * np.cos(self.__robot.get_current_angle())
-            - location[1] * np.sin(self.__robot.get_current_angle())
-        )
+    def draw_detected_objects_on_display(self, location: Tuple):
+        distance_to_goal, goal_angle = location
+        robot_x, robot_y = self.__robot.get_current_position()
+        robot_angle = self.__robot.get_current_angle() - goal_angle / 2
+
+        x = robot_x + distance_to_goal * np.cos(robot_angle)
         x = self.__map_to_display(x, True)
 
-        y = (
-            self.__robot.get_current_position()[1]
-            + location[0] * np.sin(self.__robot.get_current_angle())
-            + location[1] * np.cos(self.__robot.get_current_angle())
-        )
+        y = robot_y + distance_to_goal * np.sin(robot_angle)
         y = self.__map_to_display(y, False)
 
         self.__detected_objects.append((x, y))

@@ -66,6 +66,6 @@ if __name__ == "__main__":
             if detected_objects is not None:
                 for object_location in detected_objects:
                     Logger.success(f"Object detected at: {object_location}")
-                    visualizer.draw_detected_objects(object_location)
+                    visualizer.draw_detected_objects_on_display(object_location)
 
         counter = (counter + 1) % SKIP_FRAMES

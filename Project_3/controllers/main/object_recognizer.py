@@ -220,4 +220,8 @@ class ObjectRecognizer:
         if (class_name != "cup" and class_name != "bottle") or distance is None:
             return None
         cv2.imwrite(r"test.jpg", scene_image)  # save the image with boxes
+        distance = self.__map(distance, 0.15875, 0.21759, 0.3968, 0.5156)
         return [(distance, angle)]
+
+    def __map(self, x, in_min, in_max, out_min, out_max):
+        return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min

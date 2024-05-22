@@ -2,12 +2,14 @@
     "cSpell.words": [
         "edgecolor",
         "EPUCK",
+        "imwrite",
         "inds",
         "linalg",
         "linewidth",
         "minmax",
         "VRML",
         "Webot",
+        "xyxy",
         "YOLO"
     ],
     "[python]": {
