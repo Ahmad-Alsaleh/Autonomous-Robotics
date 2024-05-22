@@ -44,6 +44,7 @@ if __name__ == "__main__":
                 start, goal, show_animation=SHOW_RRT_ANIMATION
             )
             visualizer.draw_path_on_map(path)
+            visualizer.draw_path_on_display(path)
             logging.info(f"Path: {path}")
 
         left_speed, right_speed = speed_controller.compute_motors_speed()
