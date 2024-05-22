@@ -1,9 +1,7 @@
 from typing import Tuple
-import os, sys, numpy as np
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from main.deliberative_layer import ObstaclesMap, Rectangle
-from main.robot import Robot
+import numpy as np
+from deliberative_layer import ObstaclesMap, Rectangle
+from robot import Robot
 
 WIDTH, HEIGHT = 256, 256
 MAP_MIN_X = 0

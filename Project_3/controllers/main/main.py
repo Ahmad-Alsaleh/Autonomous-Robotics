@@ -1,14 +1,10 @@
-import os, sys
-from typing import Tuple
 import random
 import logging
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from main.deliberative_layer import DeliberativeLayer
-from main.apf_controller import APFController
-from main.robot import Robot
-from main.constants import obstacle_map, rand_area, play_area
-from main.object_recognizer import ObjectRecognizer
+from deliberative_layer import DeliberativeLayer
+from apf_controller import APFController
+from robot import Robot
+from constants import obstacle_map, rand_area, play_area
+from object_recognizer import ObjectRecognizer
 from visualizer import Visualizer
 
 SHOW_RRT_ANIMATION = True

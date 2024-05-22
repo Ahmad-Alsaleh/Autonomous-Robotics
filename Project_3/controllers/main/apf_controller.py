@@ -1,7 +1,7 @@
 import logging
 from typing import Tuple
-from main.robot import Robot
-from main.deliberative_layer import Waypoint, DeliberativeLayer, PathTraversalCompleted
+from robot import Robot
+from deliberative_layer import Waypoint, DeliberativeLayer, PathTraversalCompleted
 import numpy as np
 
 
