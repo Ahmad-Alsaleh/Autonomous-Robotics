@@ -7,21 +7,13 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from main.deliberative_layer import DeliberativeLayer
 from main.apf_controller import APFController
 from main.robot import Robot
-from main.constants import obstacle_map, map_area
+from main.constants import obstacle_map, rand_area, play_area
 from main.object_recognizer import ObjectRecognizer
 from visualizer import Visualizer
 
 SHOW_RRT_ANIMATION = True
 ENABLE_OBJECT_DETECTION = True
 ENABLE_LOGGING = True
-
-
-def get_random_goal(deliberative_layer: DeliberativeLayer) -> Tuple[float, float]:
-    goal = random.uniform(*map_area), random.uniform(*map_area)
-    while deliberative_layer.is_inside_obstacle(goal):
-        logging.info(f"Goal: {goal} is inside an obstacle. Generating new goal...")
-        goal = random.uniform(*map_area), random.uniform(*map_area)
-    return goal
 
 
 if __name__ == "__main__":
@@ -39,7 +31,7 @@ if __name__ == "__main__":
     """
     )
 
-    deliberative_layer = DeliberativeLayer(obstacle_map, map_area=map_area)
+    deliberative_layer = DeliberativeLayer(obstacle_map, rand_area=rand_area, play_area=play_area)
     robot = Robot()
     speed_controller = APFController(robot, deliberative_layer)
     object_recognizer = ObjectRecognizer()
@@ -49,7 +41,7 @@ if __name__ == "__main__":
     while robot.simulator_step() != -1:
         if deliberative_layer.get_path() is None:
             start = robot.get_current_position()
-            goal = get_random_goal(deliberative_layer)
+            goal = deliberative_layer.get_random_goal()
             path = deliberative_layer.generate_path(
                 start, goal, show_animation=SHOW_RRT_ANIMATION
             )

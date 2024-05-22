@@ -200,25 +200,28 @@ class RRT:
         self,
         start: Tuple[float, float],
         goal: Tuple[float, float],
-        obstacle_list: List[Rectangle],
-        rand_area,
-        expand_dis=3.0,
-        path_resolution=0.5,
-        goal_sample_rate=5,
-        max_iter=500,
-        play_area=None,
-        robot_radius=0.0,
+        obstacle_map: ObstaclesMap,
+        rand_area: Tuple[float, float],
+        expand_dis: float = 3.0,
+        path_resolution: float = 0.5,
+        goal_sample_rate: int = 5,
+        max_iter: int = 500,
+        play_area: Tuple[float, float, float, float] | None = None,
+        robot_radius: float = 0.0,
     ):
         """
         Setting Parameter
 
-        start:Start Position [x,y]
-        goal:Goal Position [x,y]
-        obstacleList:obstacle Positions [[x,y,size],...]
-        randArea:Random Sampling Area [min,max]
-        play_area:stay inside this area [xmin,xmax,ymin,ymax]
+        start:Start Position (x,y)
+        goal:Goal Position (x,y)
+        obstacle_map:ObsracleMap object representing the map of obstacles as rectangles 
+        rand_area:Random Sampling Area (min,max)
+        play_area:area specifying boundaries of the map (xmin,xmax,ymin,ymax)
         robot_radius: robot body modeled as circle with given radius
-
+        expand_dis: max distance to extend in the random direction (max distance of an edge of the tree)
+        path_resolution: resoultion of the path generated between two nodes, used for collision checking
+        goal_sample_rate: sample a node at the goal every goal_sample_rate iterations
+        max_iter: max number of iterations to run the algorithm
         """
         self.start = self.Node(start[0], start[1])
         self.end = self.Node(goal[0], goal[1])
@@ -232,7 +235,7 @@ class RRT:
         self.path_resolution = path_resolution
         self.goal_sample_rate = goal_sample_rate
         self.max_iter = max_iter
-        self.obstacle_list = obstacle_list
+        self.obstacle_list = obstacle_map
         self.node_list = []
         self.robot_radius = robot_radius
 
@@ -459,13 +462,13 @@ class RRTStar(RRT):
         self,
         start: Tuple[float, float],
         goal: Tuple[float, float],
-        obstacle_list: List[Rectangle],
-        rand_area,
-        expand_dis=30.0,
-        path_resolution=1.0,
-        goal_sample_rate=20,
-        max_iter=500,
-        connect_circle_dist=50.0,
+        obstacle_map: ObstaclesMap,
+        rand_area: Tuple[float, float],
+        expand_dis: float = 0.1,
+        path_resolution: float = 0.001,
+        goal_sample_rate: int = 20,
+        max_iter: int = 500,
+        connect_circle_dist=0.5,
         search_until_max_iter=False,
         play_area=None,
         robot_radius=0.0,
@@ -473,16 +476,22 @@ class RRTStar(RRT):
         """
         Setting Parameter
 
-        start:Start Position [x,y]
-        goal:Goal Position [x,y]
-        obstacleList:obstacle Positions [[x,y,size],...]
-        randArea:Random Sampling Area [min,max]
-
+        start:Start Position (x,y)
+        goal:Goal Position (x,y)
+        obstacle_map:ObsracleMap object representing the map of obstacles as rectangles 
+        rand_area:Random Sampling Area (min,max)
+        play_area:area specifying boundaries of the map (xmin,xmax,ymin,ymax)
+        robot_radius: robot body modeled as circle with given radius
+        expand_dis: max distance to extend in the random direction (max distance of an edge of the tree)
+        path_resolution: resoultion of the path generated between two nodes, used for collision checking
+        goal_sample_rate: sample a node at the goal every goal_sample_rate iterations
+        max_iter: max number of iterations to run the algorithm
+        connect_circle_dist: the max distance to look for neighbors and rewire them
         """
         super().__init__(
             start,
             goal,
-            obstacle_list,
+            obstacle_map,
             rand_area,
             expand_dis,
             path_resolution,
@@ -694,18 +703,32 @@ class DeliberativeLayer:
     def __init__(
         self,
         obstacle_map: ObstaclesMap,
-        map_area,
-        path_resolution=0.001,
-        expand_dis=0.1,
-        play_area=(0, 1.12, 0, 1.12),
-        max_iter=1000,
+        rand_area: float,
+        path_resolution: float = 0.001,
+        expand_dis: float = 0.1,
+        play_area: Tuple[float, float, float, float] | None = None,
+        max_iter: int = 1000,
+        connect_circle_dist: float = 0.5,
     ) -> None:
+        """
+        Setting Parameter
+
+        obstacle_list:List of Rectanglesrepresenting the obstacles
+        rand_area:Random Sampling Area (min,max)
+        play_area:area specifying boundaries of the map (xmin,xmax,ymin,ymax)
+        robot_radius: robot body modeled as circle with given radius
+        expand_dis: max distance to extend in the random direction (max distance of an edge of the tree)
+        path_resolution: resoultion of the path generated between two nodes, used for collision checking
+        goal_sample_rate: sample a node at the goal every goal_sample_rate iterations
+        max_iter: max number of iterations to run the algorithm
+        """
         self.__obstacle_map = obstacle_map
-        self.__rand_area = map_area
+        self.__rand_area = rand_area
         self.__path_resolution = path_resolution
         self.__expand_dis = expand_dis
         self.__play_area = play_area
         self.__max_iter = max_iter
+        self.__connect_circle_dist = connect_circle_dist
         self.__path = None
         self.__path_iterator = None
 
@@ -713,6 +736,16 @@ class DeliberativeLayer:
         return self.__obstacle_map.is_inside_obstacle(
             Waypoint(*point), robot_radius=self.ROBOT_RADIUS
         )
+
+    def get_random_goal(self) -> Tuple[float, float]:
+        while self.is_inside_obstacle(
+            goal := (
+                random.uniform(*self.__rand_area),
+                random.uniform(*self.__rand_area),
+            )
+        ):
+            logging.info(f"Goal: {goal} is inside an obstacle. Generating new goal...")
+        return goal
 
     def generate_path(
         self,
@@ -726,12 +759,13 @@ class DeliberativeLayer:
             start=start,
             goal=goal,
             rand_area=self.__rand_area,
-            obstacle_list=self.__obstacle_map,
+            obstacle_map=self.__obstacle_map,
             path_resolution=self.__path_resolution,
             expand_dis=self.__expand_dis,
             play_area=self.__play_area,
             robot_radius=self.ROBOT_RADIUS,
             max_iter=self.__max_iter,
+            connect_circle_dist=self.__connect_circle_dist,
         )
 
         while True:
