@@ -121,7 +121,7 @@ class APFController:
         )
 
         raw_speed = (
-            0.875 * raw_speed_angle_component + 0.125 * raw_speed_distance_component
+            0.8 * raw_speed_angle_component + 0.2 * raw_speed_distance_component
         )
         angle_difference = self.__filter_angle(angle_difference)
 

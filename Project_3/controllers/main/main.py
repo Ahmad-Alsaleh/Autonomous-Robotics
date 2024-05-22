@@ -10,7 +10,7 @@ from visualizer import Visualizer
 SHOW_RRT_ANIMATION = True
 ENABLE_OBJECT_DETECTION = True
 ENABLE_LOGGING = True
-
+SKIP_FRAMES = 5
 
 if __name__ == "__main__":
     random.seed(0)
@@ -35,7 +35,7 @@ if __name__ == "__main__":
     object_recognizer = ObjectRecognizer()
     visualizer = Visualizer(robot, obstacle_map)
     visualizer.draw_rectangular_obstacles()
-
+    counter = 0
     while robot.simulator_step() != -1:
         if deliberative_layer.get_path() is None:
             start = robot.get_current_position()
@@ -49,7 +49,7 @@ if __name__ == "__main__":
         robot.set_motors_speeds(left_speed, right_speed)
         visualizer.draw_robot()
 
-        if ENABLE_OBJECT_DETECTION:
+        if ENABLE_OBJECT_DETECTION and counter == 0:
             image = robot.get_camera_image()
             detected_objects = object_recognizer.detect_objects(
                 image,
@@ -58,3 +58,5 @@ if __name__ == "__main__":
                 for object_location in detected_objects:
                     logging.info(f"Object detected at: {object_location}")
                     visualizer.draw_detected_objects(object_location)
+        
+        counter = (counter + 1) % SKIP_FRAMES
