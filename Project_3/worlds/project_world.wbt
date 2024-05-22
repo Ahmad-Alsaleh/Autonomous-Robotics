@@ -33,6 +33,7 @@ DEF EPUCK E-puck {
   translation 0.144453 1.07205 -0.0004479
   rotation 0.011011695986692046 -0.0012114695584694293 0.9999386355637058 -1.377105307179586
   controller "main"
+  supervisor TRUE
   camera_width 224
   camera_height 224
   turretSlot [
@@ -143,6 +144,20 @@ DEF EPUCK E-puck {
       leadSize 0.004
     }
   ]
+}
+DEF WAYPOINT_TEMPLATE Solid {
+  translation 0.19 0.97 -0.24
+  children [
+    Shape {
+      appearance MattePaint {
+        baseColor 0.667994 0.47512 0.258595
+      }
+      geometry Sphere {
+        radius 0.02
+      }
+    }
+  ]
+  name "WAYPOINT_TEMPLATE"
 }
 SolidBox {
   translation 0.904974 0.405443 0.04

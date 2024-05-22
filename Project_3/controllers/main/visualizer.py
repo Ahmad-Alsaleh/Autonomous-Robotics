@@ -1,13 +1,18 @@
 from typing import Tuple
 import numpy as np
-from deliberative_layer import ObstaclesMap, Rectangle
+from deliberative_layer import ObstaclesMap, Rectangle, Waypoint, Path
 from robot import Robot
+from math import atan2, sqrt
+import re
+from controller import Supervisor
 
 WIDTH, HEIGHT = 256, 256
 MAP_MIN_X = 0
 MAP_MAX_X = 1.12
 MAP_MIN_Y = 0
 MAP_MAX_Y = 1.12
+
+PROTO_COUNTER = 0
 
 
 class Visualizer:
@@ -16,6 +21,10 @@ class Visualizer:
         self.__robot = robot
         self.__display = self.__robot.getDevice("display")
         self.__obstacle_map = obstacle_map
+        self.__supervisor = Supervisor()
+        self.__root_children = self.__supervisor.getRoot().getField("children")
+        self.__waypoint_template = self.__supervisor.getFromDef("WAYPOINT_TEMPLATE")
+        self.__generated_nodes = []
 
     def __map(self, value, from_lower, from_higher, to_lower, to_higher):
         """Maps a value from the range [`from_lower`, `from_higher`] to the range [`to_lower`, `to_higher`]."""
@@ -30,7 +39,7 @@ class Visualizer:
         else:
             return self.__map(coord, MAP_MIN_Y, MAP_MAX_Y, 0, HEIGHT)
 
-    def __draw_obstacle(self, obstacle: Rectangle) -> None:
+    def __draw_obstacle_on_display(self, obstacle: Rectangle) -> None:
         # get bottom left and top right
         x_min, y_min, x_max, y_max = obstacle.to_list()
         x = self.__map_to_display(x_min, True)
@@ -38,6 +47,89 @@ class Visualizer:
         width = self.__map_to_display(x_max - x_min, True)
         height = self.__map_to_display(y_max - y_min, False)
         self.__display.fillRectangle(x, HEIGHT - y, width, height)
+
+    def __draw_waypoint_on_map(self, waypoint: Waypoint) -> None:
+        global PROTO_COUNTER
+        waypoint_string = (
+            self.__waypoint_template.getDef()
+            + " "
+            + self.__waypoint_template.exportString()
+        )
+
+        waypoint_string = re.sub(
+            r"(.*) DEF (.*) Solid", f"DEF \\2_{PROTO_COUNTER} Solid", waypoint_string
+        )
+        # changing the translation of the waypoint
+        waypoint_string = re.sub(
+            r"translation .*",
+            f"translation {waypoint.x} {waypoint.y} 0",
+            waypoint_string,
+        )
+
+        # changing the name of the waypoint
+        waypoint_string = re.sub(
+            r'name ".*"', f'name "{waypoint.name}"', waypoint_string
+        )
+
+        # changing the color of the start and goal waypoints
+        # waypoint_string = re.sub(r".*(Solid.*)", r"\1", waypoint_string)
+        if waypoint.name == "goal":  # color it green
+            waypoint_string = re.sub(
+                r"baseColor .*", "baseColor 0 1 0", waypoint_string
+            )
+        elif waypoint.name == "start":  # color it red
+            waypoint_string = re.sub(
+                r"baseColor .*", "baseColor 1 0 0", waypoint_string
+            )
+        # import the modified waypoint string
+        self.__root_children.importMFNodeFromString(-1, waypoint_string)
+        self.__generated_nodes.append(
+            self.__supervisor.getFromDef(f"WAYPOINT_TEMPLATE_{PROTO_COUNTER}")
+        )
+        PROTO_COUNTER += 1
+
+    def __draw_path_segment_on_map(
+        self, waypoint_1, waypoint_2, *, is_path=True, thickness=0.01
+    ):
+        global PROTO_COUNTER
+        # finding the vector from waypoint_a to waypoint_b
+        delta_x = waypoint_2.x - waypoint_1.x
+        delta_y = waypoint_2.y - waypoint_1.y
+
+        length = sqrt(delta_x**2 + delta_y**2)
+        angle = atan2(delta_y, delta_x)
+
+        mid_x = (waypoint_1.x + waypoint_2.x) / 2
+        mid_y = (waypoint_1.y + waypoint_2.y) / 2
+
+        color = "1 1 1" if is_path else "0 0 0"
+
+        # VRML string for the cube
+        cube_string = f"""
+        DEF EDGE_TEMPLATE_{PROTO_COUNTER} Transform {{
+            translation {mid_x} {mid_y} 0
+            rotation 0 0 1 {angle}  # Rotate to align along the vector between waypoints
+            children [Shape {{
+                appearance MattePaint {{
+                    baseColor {color}
+                }}
+                geometry Box {{
+                    size {length} {thickness} {thickness}  # Length, height, and width of the box
+                }}
+            }}]
+        }}
+        """
+        self.__root_children.importMFNodeFromString(-1, cube_string)
+        self.__generated_nodes.append(
+            self.__supervisor.getFromDef(f"EDGE_TEMPLATE_{PROTO_COUNTER}")
+        )
+        PROTO_COUNTER += 1
+
+    def __clear_generated_nodes(self):
+        for node in self.__generated_nodes:
+            if node is not None:
+                node.remove()
+        self.__generated_nodes = []
 
     def draw_robot(self):
         self.__display.setColor(0xFF0000)
@@ -70,4 +162,13 @@ class Visualizer:
     def draw_rectangular_obstacles(self) -> None:
         self.__display.setColor(0x0000FF)
         for obstacle in self.__obstacle_map:
-            self.__draw_obstacle(obstacle)
+            self.__draw_obstacle_on_display(obstacle)
+
+    def draw_path_on_map(self, path) -> None:
+        self.__clear_generated_nodes()
+        start = path[0]
+        self.__draw_waypoint_on_map(start)
+        for node in path[1:]:
+            self.__draw_waypoint_on_map(node)
+            self.__draw_path_segment_on_map(start, node)
+            start = node

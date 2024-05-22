@@ -43,6 +43,7 @@ if __name__ == "__main__":
             path = deliberative_layer.generate_path(
                 start, goal, show_animation=SHOW_RRT_ANIMATION
             )
+            visualizer.draw_path_on_map(path)
             logging.info(f"Path: {path}")
 
         left_speed, right_speed = speed_controller.compute_motors_speed()
