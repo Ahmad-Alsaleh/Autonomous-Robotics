@@ -25,7 +25,10 @@ class APFController:
         """Calculates the heading vector from the current position to the goal position."""
         return self.__destination.to_numpy() - self.__robot.get_current_position()
 
-    def __get_attractive_force(self, max_magnitude=5) -> np.ndarray:
+    def __get_attractive_force(
+        self,
+        max_magnitude=5,
+    ) -> np.ndarray:
         heading = self.__get_heading_vector()
         return (max_magnitude / (np.linalg.norm(heading) + 1e-6)) * (heading)
 
@@ -116,8 +119,10 @@ class APFController:
             0,
             self.__robot.MAX_SPEED,
         )
-        
-        raw_speed = 0.875*raw_speed_angle_component + 0.125*raw_speed_distance_component
+
+        raw_speed = (
+            0.875 * raw_speed_angle_component + 0.125 * raw_speed_distance_component
+        )
         angle_difference = self.__filter_angle(angle_difference)
 
         left_speed = raw_speed - angle_difference

@@ -31,7 +31,9 @@ if __name__ == "__main__":
     """
     )
 
-    deliberative_layer = DeliberativeLayer(obstacle_map, rand_area=rand_area, play_area=play_area)
+    deliberative_layer = DeliberativeLayer(
+        obstacle_map, rand_area=rand_area, play_area=play_area
+    )
     robot = Robot()
     speed_controller = APFController(robot, deliberative_layer)
     object_recognizer = ObjectRecognizer()
@@ -53,7 +55,9 @@ if __name__ == "__main__":
 
         if ENABLE_OBJECT_DETECTION:
             image = robot.get_camera_image()
-            detected_objects = object_recognizer.detect_objects(image)
+            detected_objects = object_recognizer.detect_objects(
+                image,
+            )
             if detected_objects is not None:
                 for object_location in detected_objects:
                     logging.info(f"Object detected at: {object_location}")

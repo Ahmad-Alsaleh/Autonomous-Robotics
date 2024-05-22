@@ -214,12 +214,12 @@ class RRT:
 
         start:Start Position (x,y)
         goal:Goal Position (x,y)
-        obstacle_map:ObsracleMap object representing the map of obstacles as rectangles 
+        obstacle_map: ObsracleMap object representing the map of obstacles as rectangles
         rand_area:Random Sampling Area (min,max)
         play_area:area specifying boundaries of the map (xmin,xmax,ymin,ymax)
         robot_radius: robot body modeled as circle with given radius
         expand_dis: max distance to extend in the random direction (max distance of an edge of the tree)
-        path_resolution: resoultion of the path generated between two nodes, used for collision checking
+        path_resolution: resolution of the path generated between two nodes, used for collision checking
         goal_sample_rate: sample a node at the goal every goal_sample_rate iterations
         max_iter: max number of iterations to run the algorithm
         """
@@ -478,12 +478,12 @@ class RRTStar(RRT):
 
         start:Start Position (x,y)
         goal:Goal Position (x,y)
-        obstacle_map:ObsracleMap object representing the map of obstacles as rectangles 
+        obstacle_map: ObsracleMap object representing the map of obstacles as rectangles
         rand_area:Random Sampling Area (min,max)
         play_area:area specifying boundaries of the map (xmin,xmax,ymin,ymax)
         robot_radius: robot body modeled as circle with given radius
         expand_dis: max distance to extend in the random direction (max distance of an edge of the tree)
-        path_resolution: resoultion of the path generated between two nodes, used for collision checking
+        path_resolution: resolution of the path generated between two nodes, used for collision checking
         goal_sample_rate: sample a node at the goal every goal_sample_rate iterations
         max_iter: max number of iterations to run the algorithm
         connect_circle_dist: the max distance to look for neighbors and rewire them
@@ -713,12 +713,12 @@ class DeliberativeLayer:
         """
         Setting Parameter
 
-        obstacle_list:List of Rectanglesrepresenting the obstacles
-        rand_area:Random Sampling Area (min,max)
+        obstacle_list: List of Rectangles representing the obstacles
+        rand_area: Random Sampling Area (min,max)
         play_area:area specifying boundaries of the map (xmin,xmax,ymin,ymax)
         robot_radius: robot body modeled as circle with given radius
         expand_dis: max distance to extend in the random direction (max distance of an edge of the tree)
-        path_resolution: resoultion of the path generated between two nodes, used for collision checking
+        path_resolution: resolution of the path generated between two nodes, used for collision checking
         goal_sample_rate: sample a node at the goal every goal_sample_rate iterations
         max_iter: max number of iterations to run the algorithm
         """

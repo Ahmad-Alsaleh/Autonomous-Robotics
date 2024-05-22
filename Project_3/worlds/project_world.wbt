@@ -30,7 +30,7 @@ RectangleArena {
   wallHeight 0.2
 }
 DEF EPUCK E-puck {
-  translation 0.671716 1.02174 -0.0004479
+  translation 0.144453 1.07205 -0.0004479
   rotation 0.011011695986692046 -0.0012114695584694293 0.9999386355637058 -1.377105307179586
   controller "main"
   camera_width 224
