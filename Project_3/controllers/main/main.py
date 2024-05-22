@@ -6,6 +6,7 @@ from robot import Robot
 from constants import obstacle_map, rand_area, play_area
 from object_recognizer import ObjectRecognizer
 from visualizer import Visualizer
+from matplotlib import use
 
 SHOW_RRT_ANIMATION = True
 ENABLE_OBJECT_DETECTION = True
@@ -30,6 +31,7 @@ if __name__ == "__main__":
     )
 
     object_recognizer = ObjectRecognizer()
+    use("TkAgg")
     deliberative_layer = DeliberativeLayer(
         obstacle_map, rand_area=rand_area, play_area=play_area
     )
