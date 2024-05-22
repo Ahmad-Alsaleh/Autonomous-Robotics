@@ -91,14 +91,9 @@ class Visualizer:
         PROTO_COUNTER += 1
 
     def __draw_waypoint_on_display(self, waypoint: Waypoint) -> None:
-        x = waypoint.x
-        y = waypoint.y
-        self.__display.fillOval(
-            self.__map_to_display(x, True),
-            HEIGHT - self.__map_to_display(y, False),
-            3,
-            3,
-        )
+        x = self.__map_to_display(waypoint.x, True)
+        y = self.__map_to_display(waypoint.y, False)
+        self.__display.fillOval(x, HEIGHT - y, 3, 3)
 
     def __draw_path_segment_on_map(
         self, waypoint_1, waypoint_2, *, is_path=True, thickness=0.01

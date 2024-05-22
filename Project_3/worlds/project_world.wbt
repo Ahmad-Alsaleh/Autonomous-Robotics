@@ -11,8 +11,8 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/project
 WorldInfo {
 }
 Viewpoint {
-  orientation -0.4229876025648433 0.43840662367583483 0.7930202521963744 1.7656539288392645
-  position 0.4714940698444263 -1.583527470327688 3.1444638082166336
+  orientation -0.2888359577031111 0.27358946277471774 0.9174544105275029 1.7107201161701984
+  position 0.8006198691872035 -2.5196514801759413 2.2273215236310953
 }
 TexturedBackground {
 }
@@ -30,7 +30,7 @@ RectangleArena {
   wallHeight 0.2
 }
 DEF EPUCK E-puck {
-  translation 0.144453 1.07205 -0.0004479
+  translation 0.140179 1.0696 -0.0004479
   rotation 0.011011695986692046 -0.0012114695584694293 0.9999386355637058 -1.377105307179586
   controller "main"
   supervisor TRUE
@@ -153,7 +153,7 @@ DEF WAYPOINT_TEMPLATE Solid {
         baseColor 0.667994 0.47512 0.258595
       }
       geometry Sphere {
-        radius 0.02
+        radius 0.01
       }
     }
   ]
