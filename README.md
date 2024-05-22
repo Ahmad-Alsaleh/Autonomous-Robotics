@@ -1,8 +1,8 @@
-# Intelligent Autonomous Robotics Coursework
+# Intelligent Autonomous Robotics - CMP 494-10
 
 ## Description
 
-This repository contains our practical homeworks and projects that were implemented using Webots Simulator. It breaks down into the following:
+This repository houses our practical assignments and projects, all of which were developed using the Webots Simulator. The content is organized as follows:
 
 - **HW 3 - Implementation of a Finite State Automaton in a Reactive Wheeled Robot for Simple Can Detection**
 - **Project 1 - Implementation of Artificial Potential Field**
@@ -11,13 +11,14 @@ This repository contains our practical homeworks and projects that were implemen
 
 ## Technologies Used
 
-The homework and projects are implemented using Python and the following libraries:
+The assignments and projects are implemented using Python and the following libraries:
 
 - [OpenCV](https://opencv.org/): Used for real-time computer vision to read and manipulate images and videos.
 - [NumPy](https://numpy.org/): Used for numerical computations in Python.
 - [PyTorch](https://pytorch.org/): An open-source machine learning library used to create and train the neural network.
 - [Matplotlib](https://matplotlib.org/): Used for creating static, animated, and interactive visualizations in Python.
 - [Scikit-learn](https://scikit-learn.org/stable/): A machine learning library in Python. It features various classification, regression and clustering algorithms.
+- [YOLOv5](https://github.com/ultralytics/yolov5): State-of-the-art open-source object detection model from Ultralytics.
 
 ## Installation & Usage
 
@@ -33,9 +34,11 @@ The homework and projects are implemented using Python and the following librari
 
 4. Run the simulation
 
+**Note: If YOLO is not already installed, it will be downloaded and installed when running Project 3's simulation. This may cause the simulation to take a while to start.**
+
 ## Credits
 
-The homework and projects were developed for the Intelligent Autonomous Robotics course at American University of Sharjah by [Ahmed Alsaleh](https://github.com/Ahmad-Alsaleh), [Ahmed Alabd Aljabar](https://github.com/akvnn), [Omar Ibrahim](https://github.com/amoor22), and [Yousef Irshaid](https://github.com/yousefbilal).
+The assignments and projects were developed for the Intelligent Autonomous Robotics course at American University of Sharjah by [Ahmed Alsaleh](https://github.com/Ahmad-Alsaleh), [Ahmed Alabd Aljabar](https://github.com/akvnn), [Omar Ibrahim](https://github.com/amoor22), and [Yousef Irshaid](https://github.com/yousefbilal).
 
 Immense gratitude is extended to Dr. Michel Pasquier for his invaluable mentorship during the duration of the course.
 

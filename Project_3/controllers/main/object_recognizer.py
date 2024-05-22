@@ -123,7 +123,7 @@ def find_position(H, image_left, image_right):
 # -------------------------------------
 class ObjectRecognizer:
     def __init__(self) -> None:
-        self.__target_image_gray = read_image("target_object2_nobg.png")
+        self.__target_image_gray = read_image("sift_reference_target.png")
         self.__kp_target, self.__des_target = SIFT(self.__target_image_gray)
         self.__k = 4  # hyperparameter
         self.__target_size = 0.0635  # in meters, must be known in advance

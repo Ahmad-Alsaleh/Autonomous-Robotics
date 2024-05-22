@@ -3,3 +3,4 @@ matplotlib
 numpy
 torch
 scikit-learn
+git+https://github.com/ultralytics/yolov5.git

@@ -4,6 +4,7 @@ from deliberative_layer import ObstaclesMap, Rectangle, Waypoint, Path
 from robot import Robot
 from math import atan2, sqrt
 import re
+from sklearn.cluster import DBSCAN
 from controller import Supervisor
 from constants import play_area
 
@@ -146,20 +147,22 @@ class Visualizer:
                 node.remove()
         self.__generated_nodes = []
 
-    def __draw_detected_objects(self, location: Tuple):
+    def __draw_detected_objects(self, location: Tuple, final = False):
         x, y = location
         self.__display.setColor(0xFF00FF)
         self.__display.setOpacity(0.2)
+        if final:
+            self.__display.setOpacity(1)
         self.__display.fillOval(x, HEIGHT - y, 7, 7)
 
-    def __refresh_display(self):
+    def __refresh_display(self, final = False):
         """Redraws the background, obstacles, and detected objects on the display."""
         self.__display.setOpacity(1)
         self.__display.setColor(BACKGROUND_COLOR)
         self.__display.fillRectangle(0, 0, WIDTH, HEIGHT)
         self.draw_rectangular_obstacles()
         for location in self.__detected_objects:
-            self.__draw_detected_objects(location)
+            self.__draw_detected_objects(location, final)
 
     def draw_robot(self):
         self.__display.setColor(0xFF0000)
@@ -207,3 +210,15 @@ class Visualizer:
             self.__draw_waypoint_on_display(node)
             self.__draw_path_segment_on_display(start, node)
             start = node
+    def finetune_detected_objects(self):
+        self.__detected_objects = np.array(self.__detected_objects)
+        db = DBSCAN(eps=30, min_samples=2).fit(self.__detected_objects)
+        centroids = []
+        for label in np.unique(db.labels_):
+            if label == -1: # ignore noise points
+                continue
+            cluster = self.__detected_objects[db.labels_ == label]
+            centroid = np.mean(cluster, axis=0)
+            centroids.append(centroid)
+        self.__detected_objects = centroids
+        self.__refresh_display(final = True)
