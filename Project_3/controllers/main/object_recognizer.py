@@ -149,16 +149,16 @@ class ObjectRecognizer:
         return distance, angle
 
     def detect_objects(
-        self, scene_image: np.ndarray, *, model: Literal["YOLO", "SWIFT"]
+        self, scene_image: np.ndarray, *, model: Literal["YOLO", "SIFT"]
     ) -> np.ndarray:
         if model == "YOLO":
             return self.__detect_objects_yolo(scene_image)
-        elif model == "SWIFT":
-            return self.__detect_objects_swift(scene_image)
+        elif model == "SIFT":
+            return self.__detect_objects_sift(scene_image)
         else:
             raise ValueError("Invalid object detection algorithm")
 
-    def __detect_objects_swift(self, scene_image: np.ndarray) -> np.ndarray:
+    def __detect_objects_sift(self, scene_image: np.ndarray) -> np.ndarray:
         """Detects target objects in the image and returns the coordinates of the object(s) if any."""
         if scene_image is None:
             raise ValueError("Image not found")
