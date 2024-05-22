@@ -34,6 +34,7 @@ DEF EPUCK E-puck {
   rotation 0.011011695986692046 -0.0012114695584694293 0.9999386355637058 -1.377105307179586
   controller "main"
   supervisor TRUE
+  camera_fieldOfView 1.57
   camera_width 224
   camera_height 224
   turretSlot [

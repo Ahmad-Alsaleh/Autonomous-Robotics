@@ -1,8 +1,7 @@
 import numpy as np
 import cv2
 import random
-
-
+import torch
 # -------------------------------------
 # Functions for object recognition
 # -------------------------------------
@@ -17,6 +16,7 @@ def read_image(path):
 
 
 def SIFT(img):
+    # siftDetector= cv2.SIFT_create(nfeatures=100, nOctaveLayers=4, contrastThreshold=0.04, edgeThreshold=1, sigma=1.6) 
     siftDetector = cv2.SIFT_create()
     kp, des = siftDetector.detectAndCompute(img, None)
     return kp, des
@@ -121,13 +121,11 @@ class ObjectRecognizer:
     def __init__(self) -> None:
         self.__target_image_gray = read_image("target_object2_nobg.png")
         self.__kp_target, self.__des_target = SIFT(self.__target_image_gray)
-        self.__k = 4  # hyperparameter
-        self.__target_size = 0.0635  # in meters, must be known in advance
-        self.__fov = 0.84  # in radian
-        self.__focal_length = self.__target_image_gray.shape[1] / (
-            2 * np.tan(self.__fov / 2)
-        )
-
+        self.__k = 4 #hyperparameter
+        self.__target_size = 0.0635 # in meters, must be known in advance
+        self.__fov = 1.57 # in radian
+        self.__focal_length = self.__target_image_gray.shape[1] / (2 * np.tan(self.__fov / 2))
+        self.yolo_model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True, force_reload=False).to('cpu')
     def compute_distance_and_angle(self, x_min, x_max, scene_image):
         """Computes the distance and angle of the target object in the scene image from the coordinates"""
         if x_min is None:
@@ -179,8 +177,27 @@ class ObjectRecognizer:
         x_min, y_min, x_max, y_max = find_position(
             best_H, self.__target_image_gray, scene_image
         )
+        if x_max and x_min and (x_max - x_min) < 0.01:
+            return None
         distance, angle = self.compute_distance_and_angle(x_min, x_max, scene_image)
         if distance is None:
             return None
-        cv2.imwrite("test.png", scene_image)  # save the image for debugging
+        cv2.imwrite('test.png', scene_image) # save the image for debugging
+        return [(distance,angle)]    
+
+    def detect_objects_yolo(self, scene_image: np.ndarray) -> np.ndarray:
+        """Detects target objects in the image and returns the coordinates of the object(s) if any."""
+        scene_image = cv2.cvtColor(scene_image, cv2.COLOR_RGB2BGR)
+        results = self.yolo_model(scene_image)
+        results.render()
+        if len(results.xyxy[0]) == 0:
+            return None
+        x_min = results.xyxy[0][0][0]
+        x_max = results.xyxy[0][0][2]
+        distance, angle = self.compute_distance_and_angle(x_min, x_max, scene_image)
+        class_name = results.names[int(results.xyxy[0][0][5])]
+        # print(class_name) # to show the class name of the detected object
+        if (class_name != 'cup' and class_name != 'bottle') or distance is None:
+            return None
+        cv2.imwrite(r'test.jpg', scene_image) # save the image with boxes   
         return [(distance, angle)]

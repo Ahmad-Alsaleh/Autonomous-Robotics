@@ -10,7 +10,8 @@ from visualizer import Visualizer
 SHOW_RRT_ANIMATION = True
 ENABLE_OBJECT_DETECTION = True
 ENABLE_LOGGING = True
-SKIP_FRAMES = 5
+SKIP_FRAMES = 8 # My lucky number
+YOLO = True # Set to True to use YOLO for object detection. Otherwise SIFT will be used.
 
 if __name__ == "__main__":
     random.seed(0)
@@ -23,16 +24,17 @@ if __name__ == "__main__":
         f"""Options:
         - {SHOW_RRT_ANIMATION = }
         - {ENABLE_OBJECT_DETECTION = }
+        - {YOLO = }
         - {ENABLE_LOGGING = }
     """
     )
 
+    object_recognizer = ObjectRecognizer()
     deliberative_layer = DeliberativeLayer(
         obstacle_map, rand_area=rand_area, play_area=play_area
     )
     robot = Robot()
     speed_controller = APFController(robot, deliberative_layer)
-    object_recognizer = ObjectRecognizer()
     visualizer = Visualizer(robot, obstacle_map)
     visualizer.draw_rectangular_obstacles()
     counter = 0
@@ -53,9 +55,10 @@ if __name__ == "__main__":
 
         if ENABLE_OBJECT_DETECTION and counter == 0:
             image = robot.get_camera_image()
-            detected_objects = object_recognizer.detect_objects(
-                image,
-            )
+            if YOLO:
+                detected_objects = object_recognizer.detect_objects_yolo(image)
+            else:
+                detected_objects = object_recognizer.detect_objects(image)
             if detected_objects is not None:
                 for object_location in detected_objects:
                     logging.info(f"Object detected at: {object_location}")
