@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import random
 from logger import Logger
 
+
 class PathTraversalCompleted(Exception):
     pass
 
@@ -743,7 +744,9 @@ class DeliberativeLayer:
                 random.uniform(*self.__rand_area),
             )
         ):
-            Logger.warning(f"Goal: {goal} is inside an obstacle. Generating new goal...")
+            Logger.warning(
+                f"Goal: {goal} is inside an obstacle. Generating new goal..."
+            )
         return goal
 
     def generate_path(
@@ -785,6 +788,7 @@ class DeliberativeLayer:
                 linewidth=2.5,
             )
             plt.pause(0.01)
+            rrt_star.draw_graph()
 
         return self.__path
 
