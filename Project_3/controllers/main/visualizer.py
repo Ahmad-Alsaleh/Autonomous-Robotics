@@ -173,19 +173,28 @@ class Visualizer:
         self.__display.fillOval(x, HEIGHT - y, 1, 1)
 
     def draw_detected_objects_on_display(self, location: Tuple):
-        distance_to_goal, goal_angle = location
-        robot_x, robot_y = self.__robot.get_current_position()
-        robot_angle = self.__robot.get_current_angle() - goal_angle / 2
+        """Converts polar coordinates to Cartesian coordinates in the camera's local coordinate system"""
+        distance, angle = location
+        angle = 2 * np.pi - angle 
+        x_cam = distance * np.cos(angle)
+        y_cam = distance * np.sin(angle)
 
-        x = robot_x + distance_to_goal * np.cos(robot_angle)
-        x = self.__map_to_display(x, True)
+        robot_position = self.__robot.get_current_position()
+        robot_angle = self.__robot.get_current_angle()
 
-        y = robot_y + distance_to_goal * np.sin(robot_angle)
-        y = self.__map_to_display(y, False)
+        cos_robot_angle = np.cos(robot_angle)
+        sin_robot_angle = np.sin(robot_angle)
 
-        self.__detected_objects.append((x, y))
-        self.__draw_detected_objects((x, y))
+        x_map = robot_position[0] + x_cam * cos_robot_angle - y_cam * sin_robot_angle
+        y_map = robot_position[1] + x_cam * sin_robot_angle + y_cam * cos_robot_angle
 
+        # Convert map coordinates to display coordinates
+        x_display = self.__map_to_display(x_map, True)
+        y_display = self.__map_to_display(y_map, False)
+        
+        self.__detected_objects.append((x_display, y_display))
+        self.__draw_detected_objects((x_display, y_display))
+        
     def draw_rectangular_obstacles(self) -> None:
         self.__display.setColor(0x0000FF)
         for obstacle in self.__obstacle_map:
@@ -210,6 +219,7 @@ class Visualizer:
             self.__draw_waypoint_on_display(node)
             self.__draw_path_segment_on_display(start, node)
             start = node
+            
     def finetune_detected_objects(self):
         self.__detected_objects = np.array(self.__detected_objects)
         db = DBSCAN(eps=30, min_samples=2).fit(self.__detected_objects)

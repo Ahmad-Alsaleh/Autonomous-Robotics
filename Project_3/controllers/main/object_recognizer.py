@@ -220,8 +220,7 @@ class ObjectRecognizer:
         # print(class_name) # to show the class name of the detected object
         if (class_name not in self.possibilities) or distance is None:
             return None
-        cv2.imwrite(r"test.jpg", scene_image)  # save the image with boxes
-        distance = self.__map(distance, 0.15875, 0.21759, 0.3968, 0.5156)
+        cv2.imwrite(r"test.jpg", scene_image)  # save the image with the detected object for debugging
         return [(distance, angle)]
 
     def __map(self, x, in_min, in_max, out_min, out_max):
