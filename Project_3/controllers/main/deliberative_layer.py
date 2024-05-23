@@ -787,7 +787,7 @@ class DeliberativeLayer:
                 "-r",
                 linewidth=2.5,
             )
-            plt.pause(0.01)
+            plt.pause(0.03)
             rrt_star.draw_graph()
 
         return self.__path
