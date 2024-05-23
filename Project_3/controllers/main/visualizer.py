@@ -208,9 +208,11 @@ class Visualizer:
             self.__draw_path_segment_on_display(start, node)
             start = node
 
-    def finetune_detected_objects(self):
+    def finetune_detected_objects(self, neighborhood_radius=30, min_samples=2):
         self.__detected_objects = np.array(self.__detected_objects)
-        db = DBSCAN(eps=30, min_samples=2).fit(self.__detected_objects)
+        db = DBSCAN(eps=neighborhood_radius, min_samples=min_samples).fit(
+            self.__detected_objects
+        )
         centroids = []
         for label in np.unique(db.labels_):
             if label == -1:  # ignore noise points
