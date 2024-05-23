@@ -122,12 +122,12 @@ def find_position(H, image_left, image_right):
 # ObjectRecognizer class
 # -------------------------------------
 class ObjectRecognizer:
-    def __init__(self) -> None:
+    def __init__(self, robot) -> None:
         self.__target_image_gray = read_image("sift_reference_target.png")
         self.__kp_target, self.__des_target = SIFT(self.__target_image_gray)
         self.__k = 4  # hyperparameter
         self.__target_size = 0.0635  # in meters, must be known in advance
-        self.__fov = 1.57  # in radian
+        self.__fov = robot.getFov()  # in radian
         self.__focal_length = self.__target_image_gray.shape[1] / (
             2 * np.tan(self.__fov / 2)
         )
@@ -225,7 +225,7 @@ class ObjectRecognizer:
         if (class_name not in self.possibilities) or distance is None:
             return None
         cv2.imwrite(r"test.jpg", scene_image)  # save the image with boxes
-        distance = self.__map(distance, 0.15875, 0.21759, 0.3968, 0.5156)
+        # distance = self.__map(distance, 0.15875, 0.21759, 0.3968, 0.5156)
         return [(distance, angle)]
 
     def __map(self, x, in_min, in_max, out_min, out_max):

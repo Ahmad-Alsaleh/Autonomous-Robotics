@@ -29,11 +29,11 @@ if __name__ == "__main__":
     )
 
     # initialize objects
-    object_recognizer = ObjectRecognizer()
+    robot = Robot()
+    object_recognizer = ObjectRecognizer(robot)
     deliberative_layer = DeliberativeLayer(
         obstacle_map, rand_area=rand_area, play_area=play_area
     )
-    robot = Robot()
     speed_controller = APFController(robot, deliberative_layer)
     visualizer = Visualizer(robot, obstacle_map)
     visualizer.draw_rectangular_obstacles()

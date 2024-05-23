@@ -91,3 +91,6 @@ class Robot(Robot):
 
     def saveDisplay(self, filename: str):
         self.__display.imageSave(None, filename)
+
+    def getFov(self):
+        return self.__camera.getFov()
