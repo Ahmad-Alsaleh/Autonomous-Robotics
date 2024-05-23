@@ -2,5 +2,6 @@ opencv-python
 matplotlib
 numpy
 torch
+torchvision
 scikit-learn
-git+https://github.com/ultralytics/yolov5.git
+# git+https://github.com/ultralytics/yolov5.git
