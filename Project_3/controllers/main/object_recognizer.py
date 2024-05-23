@@ -133,7 +133,11 @@ class ObjectRecognizer:
         )
         self.possibilities = ["cup", "bottle", "cell phone", "book"]
         self.yolo_model = torch.hub.load(
-            "ultralytics/yolov5", "yolov5s", pretrained=True, force_reload=False, verbose=False
+            "ultralytics/yolov5",
+            "yolov5s",
+            pretrained=True,
+            force_reload=False,
+            verbose=False,
         ).to("cpu")
         use("TkAgg")  # use TkAgg backend to avoid conflicts with other libraries
 

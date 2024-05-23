@@ -34,19 +34,21 @@ class Visualizer:
         ) + to_lower
         return np.clip(mapped_value, min(to_lower, to_higher), max(to_lower, to_higher))
 
-    def __map_to_display(self, coord: int, is_x: bool = True):
-        if is_x:
-            return self.__map(coord, MAP_MIN_X, MAP_MAX_X, 0, WIDTH)
-        else:
-            return self.__map(coord, MAP_MIN_Y, MAP_MAX_Y, 0, HEIGHT)
+    def __map_to_display(self, coord_x: float, coord_y: float):
+        x_t = self.__map(coord_x, MAP_MIN_X, MAP_MAX_X, 0, WIDTH)
+        y_t = self.__map(coord_y, MAP_MIN_Y, MAP_MAX_Y, 0, WIDTH)
+        return x_t, y_t
+
+    def __display_to_map(self, x: int, y: int):
+        x_t = self.__map(x, 0, WIDTH, MAP_MIN_X, MAP_MAX_X)
+        y_t = self.__map(y, 0, HEIGHT, MAP_MIN_Y, MAP_MAX_Y)
+        return x_t, y_t
 
     def __draw_obstacle_on_display(self, obstacle: Rectangle) -> None:
         # get bottom left and top right
         x_min, y_min, x_max, y_max = obstacle.to_list()
-        x = self.__map_to_display(x_min, True)
-        y = self.__map_to_display(y_max, False)
-        width = self.__map_to_display(x_max - x_min, True)
-        height = self.__map_to_display(y_max - y_min, False)
+        x, y = self.__map_to_display(x_min, y_max)
+        width, height = self.__map_to_display(x_max - x_min, y_max - y_min)
         self.__display.fillRectangle(x, HEIGHT - y, width, height)
 
     def __draw_waypoint_on_map(self, waypoint: Waypoint) -> None:
@@ -90,8 +92,7 @@ class Visualizer:
         PROTO_COUNTER += 1
 
     def __draw_waypoint_on_display(self, waypoint: Waypoint) -> None:
-        x = self.__map_to_display(waypoint.x, True)
-        y = self.__map_to_display(waypoint.y, False)
+        x, y = self.__map_to_display(waypoint.x, waypoint.y)
         self.__display.fillOval(x, HEIGHT - y, 3, 3)
 
     def __draw_path_segment_on_map(
@@ -135,10 +136,8 @@ class Visualizer:
         PROTO_COUNTER += 1
 
     def __draw_path_segment_on_display(self, waypoint_1, waypoint_2):
-        x1 = self.__map_to_display(waypoint_1.x, True)
-        y1 = self.__map_to_display(waypoint_1.y, False)
-        x2 = self.__map_to_display(waypoint_2.x, True)
-        y2 = self.__map_to_display(waypoint_2.y, False)
+        x1, y1 = self.__map_to_display(waypoint_1.x, waypoint_1.y)
+        x2, y2 = self.__map_to_display(waypoint_2.x, waypoint_2.y)
         self.__display.drawLine(x1, HEIGHT - y1, x2, HEIGHT - y2)
 
     def __clear_generated_nodes(self):
@@ -147,7 +146,7 @@ class Visualizer:
                 node.remove()
         self.__generated_nodes = []
 
-    def __draw_detected_objects(self, location: Tuple, final = False):
+    def __draw_detected_objects(self, location: Tuple, final=False):
         x, y = location
         self.__display.setColor(0xFF00FF)
         self.__display.setOpacity(0.2)
@@ -155,7 +154,7 @@ class Visualizer:
             self.__display.setOpacity(1)
         self.__display.fillOval(x, HEIGHT - y, 7, 7)
 
-    def __refresh_display(self, final = False):
+    def __refresh_display(self, final=False):
         """Redraws the background, obstacles, and detected objects on the display."""
         self.__display.setOpacity(1)
         self.__display.setColor(BACKGROUND_COLOR)
@@ -167,9 +166,8 @@ class Visualizer:
     def draw_robot(self):
         self.__display.setColor(0xFF0000)
         self.__display.setOpacity(0.15)
-
-        x = self.__map_to_display(self.__robot.get_current_position()[0], True)
-        y = self.__map_to_display(self.__robot.get_current_position()[1], False)
+        x, y = self.__robot.get_current_position()
+        x, y = self.__map_to_display(x, y)
         self.__display.fillOval(x, HEIGHT - y, 1, 1)
 
     def draw_detected_objects_on_display(self, location: Tuple):
@@ -178,10 +176,9 @@ class Visualizer:
         robot_angle = self.__robot.get_current_angle() - goal_angle / 2
 
         x = robot_x + distance_to_goal * np.cos(robot_angle)
-        x = self.__map_to_display(x, True)
-
         y = robot_y + distance_to_goal * np.sin(robot_angle)
-        y = self.__map_to_display(y, False)
+
+        x, y = self.__map_to_display(x, y)
 
         self.__detected_objects.append((x, y))
         self.__draw_detected_objects((x, y))
@@ -210,15 +207,19 @@ class Visualizer:
             self.__draw_waypoint_on_display(node)
             self.__draw_path_segment_on_display(start, node)
             start = node
+
     def finetune_detected_objects(self):
         self.__detected_objects = np.array(self.__detected_objects)
         db = DBSCAN(eps=30, min_samples=2).fit(self.__detected_objects)
         centroids = []
         for label in np.unique(db.labels_):
-            if label == -1: # ignore noise points
+            if label == -1:  # ignore noise points
                 continue
             cluster = self.__detected_objects[db.labels_ == label]
             centroid = np.mean(cluster, axis=0)
             centroids.append(centroid)
         self.__detected_objects = centroids
-        self.__refresh_display(final = True)
+        self.__refresh_display(final=True)
+        return list(
+            map(lambda centroid: Waypoint(*self.__display_to_map(*centroid)), centroids)
+        )

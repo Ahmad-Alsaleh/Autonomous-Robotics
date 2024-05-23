@@ -44,9 +44,11 @@ if __name__ == "__main__":
         # Quit simulation by pressing Q
         if robot.getKey() == ord("Q"):
             Logger.warning("Simulation stopped by user. Generating final map...")
-            visualizer.finetune_detected_objects()
+            can_positions = visualizer.finetune_detected_objects()
+            Logger.success(f"Can positions: {can_positions}")
             robot.saveDisplay("map.png")
             Logger.success("Map saved as 'map.png'")
+            robot.set_motors_speeds(0, 0)
             break
 
         # 1. generate path

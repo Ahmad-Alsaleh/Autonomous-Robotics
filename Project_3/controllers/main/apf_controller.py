@@ -4,6 +4,7 @@ from deliberative_layer import Waypoint, DeliberativeLayer, PathTraversalComplet
 import numpy as np
 from logger import Logger
 
+
 class APFController:
     def __init__(
         self,
@@ -119,9 +120,7 @@ class APFController:
             self.__robot.MAX_SPEED,
         )
 
-        raw_speed = (
-            0.8 * raw_speed_angle_component + 0.2 * raw_speed_distance_component
-        )
+        raw_speed = 0.8 * raw_speed_angle_component + 0.2 * raw_speed_distance_component
         angle_difference = self.__filter_angle(angle_difference)
 
         left_speed = raw_speed - angle_difference
