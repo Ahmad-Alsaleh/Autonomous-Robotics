@@ -1,17 +1,26 @@
 {
     "cSpell.words": [
+        "Alabd",
+        "Aljabar",
         "edgecolor",
         "EPUCK",
+        "Ibrahim",
         "imwrite",
         "inds",
+        "Irshaid",
         "linalg",
         "linewidth",
+        "Matplotlib",
         "minmax",
+        "Pasquier",
+        "Scikit",
+        "Ultralytics",
         "VRML",
         "Webot",
         "Webots",
         "xyxy",
-        "YOLO"
+        "YOLO",
+        "Yousef"
     ],
     "[python]": {
         "editor.defaultFormatter": "ms-python.black-formatter"

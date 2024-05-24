@@ -9,6 +9,8 @@ This repository houses our practical assignments and projects, all of which were
 - **Project 2 - Implementation of A\* Path Planning and Waypoint Navigation in a Static Environment**
 - **Project 3 - Autonomous Can Detection and Mapping with RRT\* and YOLO**
 
+More details could be found in the requirements and answers reports found in the folder of each assignment.
+
 ## Technologies Used
 
 The assignments and projects are implemented using Python and the following libraries:
@@ -23,15 +25,16 @@ The assignments and projects are implemented using Python and the following libr
 ## Installation & Usage
 
 1. Clone this repository:
-   ```
+
+   ```bash
    git clone https://github.com/Ahmad-Alsaleh/Robotics-Course
    ```
 2. Install the required packages:
-   ```
+
+   ```bash
    pip install -r requirements.txt
    ```
 3. Launch the desired world in Webots
-
 4. Run the simulation
 
 **Note: If YOLO is not already installed, it will be downloaded and installed when running Project 3's simulation. This may cause the simulation to take a while to start.**
