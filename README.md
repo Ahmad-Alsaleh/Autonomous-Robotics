@@ -2,7 +2,7 @@
 
 ## Description
 
-This repository houses our practical assignments and projects, all of which were developed using the Webots Simulator. The content is organized as follows:
+This repository houses our practical assignments and projects, all of which were developed using the [Webots](https://cyberbotics.com/) Simulator. The content is organized as follows:
 
 - **HW 3 - Implementation of a Finite State Automaton in a Reactive Wheeled Robot for Simple Can Detection**
 - **Project 1 - Implementation of Artificial Potential Field**
@@ -38,7 +38,7 @@ The assignments and projects are implemented using Python and the following libr
 
 ## Credits
 
-The assignments and projects were developed for the Intelligent Autonomous Robotics course at American University of Sharjah by [Ahmed Alsaleh](https://github.com/Ahmad-Alsaleh), [Ahmed Alabd Aljabar](https://github.com/akvnn), [Omar Ibrahim](https://github.com/amoor22), and [Yousef Irshaid](https://github.com/yousefbilal).
+The assignments and projects were developed for the Intelligent Autonomous Robotics course at American University of Sharjah by [Ahmad Alsaleh](https://github.com/Ahmad-Alsaleh), [Ahmed Alabd Aljabar](https://github.com/akvnn), [Omar Ibrahim](https://github.com/amoor22), and [Yousef Irshaid](https://github.com/yousefbilal).
 
 Immense gratitude is extended to Dr. Michel Pasquier for his invaluable mentorship during the duration of the course.
 
