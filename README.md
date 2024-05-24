@@ -27,13 +27,15 @@ The assignments and projects are implemented using Python and the following libr
 1. Clone this repository:
 
    ```bash
-   git clone https://github.com/Ahmad-Alsaleh/Robotics-Course
+   git clone https://github.com/Ahmad-Alsaleh/Autonomous-Robotics
    ```
+
 2. Install the required packages:
 
    ```bash
    pip install -r requirements.txt
    ```
+
 3. Launch the desired world in Webots
 4. Run the simulation
 
