@@ -1,5 +1,11 @@
 # Intelligent Autonomous Robotics - CMP 494-10
 
+https://github.com/Ahmad-Alsaleh/Autonomous-Robotics/assets/61240880/d2295a8b-9a59-4872-bde0-3ddcae6317a4
+
+https://github.com/Ahmad-Alsaleh/Autonomous-Robotics/assets/61240880/cedb78e3-648b-4a24-9523-346d704055a3
+
+Note: for more demos, please refer to the [assets](./assets/) folders. Click on `Raw` to download the video.
+
 ## Description
 
 This repository houses our practical assignments and projects, all of which were developed using the [Webots](https://cyberbotics.com/) Simulator. The content is organized as follows:
