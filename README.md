@@ -6,7 +6,19 @@ https://github.com/Ahmad-Alsaleh/Autonomous-Robotics/assets/61240880/cedb78e3-64
 
 Note: for more demos, please refer to the [assets](./assets/) folders. Click on `Raw` to download the video.
 
-## Description
+---
+
+## Table of Contents
+
+- [Intelligent Autonomous Robotics - CMP 494-10](#intelligent-autonomous-robotics---cmp-494-10)
+  - [Table of Contents](#table-of-contents)
+  - [Project Description](#project-description)
+  - [Technologies Used](#technologies-used)
+  - [Installation \& Usage](#installation--usage)
+  - [Credits](#credits)
+  - [License](#license)
+
+## Project Description
 
 This repository houses our practical assignments and projects, all of which were developed using the [Webots](https://cyberbotics.com/) Simulator. The content is organized as follows:
 
