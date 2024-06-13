@@ -128,14 +128,14 @@ class Controller(Robot):
             axis=0,
         )
 
-    def get_total_force(self):
-        print("tan:", (tan := self.get_total_tangential_force(max_magnitude=10)))
-        print(
-            "rep:",
-            (rep := self.get_total_repulsive_force(sensors=[2, 5], max_magnitude=0.5)),
-        )
-        print("att:", (att := self.get_robot_heading(max_magnitude=0.001)))
-        return tan + rep + att
+    def get_total_force(self, use_tangential_force: bool = False):
+        rep = self.get_total_repulsive_force(sensors=[2, 5], max_magnitude=0.5)
+        att = self.get_robot_heading(max_magnitude=0.001)
+        if use_tangential_force:
+            tan = self.get_total_tangential_force(max_magnitude=10)
+            return tan + rep + att
+        else:
+            return rep + att
 
     def get_motors_speeds(
         self, distance_to_goal: float, total_force: np.ndarray

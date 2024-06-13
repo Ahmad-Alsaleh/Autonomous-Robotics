@@ -10,8 +10,8 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/project
 WorldInfo {
 }
 Viewpoint {
-  orientation -0.5745163394770981 0.5473681741974039 0.608538460205792 2.090755347590078
-  position 0.9662584179673139 0.378518314123675 5.191985636875198
+  orientation -0.498611340373683 0.4609823222030311 0.7340858463879141 1.9490429822510817
+  position 0.9358564834725644 -0.7419290965402381 3.55875218089043
 }
 TexturedBackground {
 }
@@ -28,50 +28,33 @@ RectangleArena {
   }
 }
 OilBarrel {
-  translation 0.415602 0.84324 0.16
-  name "oil barrel(1)"
-  height 0.4
-  radius 0.11
-}
-OilBarrel {
-  translation 0.407813 0.615284 0.16
+  translation 0.369234 0.78837 0.16
   name "oil barrel(5)"
   height 0.4
   radius 0.11
 }
 OilBarrel {
-  translation 1.25914 0.468358 0.16
+  translation 1.27682 0.891747 0.16
   name "oil barrel(8)"
   height 0.4
   radius 0.11
 }
 OilBarrel {
-  translation 1.05518 0.36237 0.16
-  name "oil barrel(7)"
-  height 0.4
-  radius 0.11
-}
-OilBarrel {
-  translation 1.05216 0.588421 0.16
+  translation 1.09429 0.619545 0.16
   name "oil barrel(6)"
   height 0.4
   radius 0.11
 }
 OilBarrel {
-  translation 1.0442 0.82235 0.16
+  translation 0.607752 0.401653 0.16
+  rotation 0 0 1 0.261799
   name "oil barrel(4)"
   height 0.4
   radius 0.11
 }
 OilBarrel {
-  translation 0.811188 1.01673 0.16
+  translation 0.734408 0.971525 0.16
   name "oil barrel(3)"
-  height 0.4
-  radius 0.11
-}
-OilBarrel {
-  translation 0.578417 0.997727 0.16
-  name "oil barrel(2)"
   height 0.4
   radius 0.11
 }
